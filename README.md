@@ -1,6 +1,6 @@
-# ppt-template
+# pptx-template
 
-ppt-template is an PowerPoint presentation builder.
+pptx-template is an PowerPoint presentation builder.
 
 This helps your routine reporting work that have many manual copy-paste from excel chart to powerpoint, or so.
 
@@ -12,7 +12,7 @@ This helps your routine reporting work that have many manual copy-paste from exc
 
 below is Japanese transation:
 
-ppt-template は pptx のテンプレートを元に、別途用意した JSON 中の文字列や CSV データを差し込んだ pptx を生成するツールです。
+pptx-template は pptx のテンプレートを元に、別途用意した JSON 中の文字列や CSV データを差し込んだ pptx を生成するツールです。
 
 定型レポートなどで大量のグラフ付きスライドを作成する際の作業を代行してくれます。
 
