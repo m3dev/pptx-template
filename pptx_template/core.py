@@ -11,10 +11,11 @@ from pptx.chart.axis import ValueAxis
 from io import StringIO
 import sys
 import codecs
-import pyel
 import re
 import logging
 import pandas as pd
+
+import pptx_template.pyel
 
 log = logging.getLogger()
 

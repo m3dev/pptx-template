@@ -10,24 +10,23 @@ import json
 from io import open
 from pptx import Presentation
 from six import iteritems
-from core import edit_slide, remove_slide, get_slide, remove_slide_id
 
-if sys.version_info[0] == 2:
-  sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+from pptx_template.core import edit_slide, remove_slide, get_slide, remove_slide_id
 
-log = logging.getLogger()
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-log.addHandler(handler)
-
-def process_slide(slide, model):
+def process_slide(ppt, slide, model):
   if model == u"remove":
     remove_slide(ppt, slide)
   else:
     edit_slide(slide, model)
 
+def main():
+  if sys.version_info[0] == 2:
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
-if __name__ == '__main__':
+  log = logging.getLogger()
+  handler = logging.StreamHandler()
+  handler.setLevel(logging.DEBUG)
+  log.addHandler(handler)
 
   parser = argparse.ArgumentParser(description = 'Edit pptx with text replace and csv import')
   parser.add_argument('--template',   help='template pptx file (required)', required=True)
@@ -49,9 +48,13 @@ if __name__ == '__main__':
     for (slide_id, model) in iteritems(slides):
       slide = get_slide(ppt, slide_id)
       remove_slide_id(ppt, slide_id)
-      process_slide(slide, model)
+      process_slide(ppt, slide, model)
   elif isinstance(slides, list):
     for (model, slide) in zip(slides, ppt.slides):
-      process_slide(slide, model)
+      process_slide(ppt, slide, model)
 
   ppt.save(opts.out)
+
+
+if __name__ == '__main__':
+  main()

@@ -1,46 +1,32 @@
 # ppt-template
 
-ppt-template ver. 2 は pptx テンプレート内に直接記入した id に対して、別途用意した JSON オブジェクト中の文字列やCSVデータを差し込んだ pptx を生成するツールです
+ppt-template is an PowerPoint presentation builder.
 
-レポートなどで大量のグラフ付きスライドを作成する際の作業を代行してくれます。
+This helps your routine reporting work that have many manual copy-paste from excel chart to powerpoint, or so.
 
-  - python2.7|3.6, pandas, pptx に依存しています
+  - Building a new powerpoint presentation file from a "template" pptx file which contains "id"
+  - Import some strings and CSV data which is defined in a JSON config file or a Python dict
+  - "id" in pptx template is expressed as a tiny DSL, like "{sales.0.june.us}"
+  - requires python envirionment (2 or 3), pandas, python-pptx
+  - for now, only UTF-8 encoding is supported for json, csv
+
+below is Japanese transation:
+
+ppt-template は pptx のテンプレートを元に、別途用意した JSON 中の文字列や CSV データを差し込んだ pptx を生成するツールです。
+
+定型レポートなどで大量のグラフ付きスライドを作成する際の作業を代行してくれます。
+
+  - テンプレートには "{sales.0.june.us}" のような形で JSON内の値を指す id を記入できます
+  - python 2 または 3, pandas, pptx に依存しています
   - 扱う json や csv の 文字コードは utf-8 前提です
 
-## Python コードからの使い方の例
+## Getting started
 
-  - git clone する (以降は、仮に ~/git/pptx-template に clone したとします)
-  - 自身が開発したいレポートに pptx-template というディレクトリを作成する
-  - ``$ cp ~/git/pptx-template/pptx-template/*.py pptx-template``
-  - テンプレートとしたい .pptx  ファイルを template.pptx という名前で用意します
-    - 中に ``{greet}`` という内容のテキストエリアを作成しておきます
-  - 自作のコードに以下のコードを追加
+TBD
 
 ```
-from pptx-template as pt
-from pptx
-
-ppt = pptx.Presentation('template.pptx')
-slide = ppt.slides[0]
-pt.edit_slide(slide, { "slides": [ { "greet": "Hello" } ] })
-ppt.save('out.pptx')
-```
-  - pptx 導入済みの python2.7 環境から上記のコードを実行
-
-
-## コマンドラインからの使い方
-
-  - git clone する (以降は、仮に ~/git/pptx-template に clone したとします)
-  - テンプレpptx を template.pptx という名前で用意します
-    - 中に ``{greet}`` という内容のテキストエリアを作成しておきます
-  - model.json という名前で以下のようなファイルを作ります
-```
-  $ cat > model.json
-  { "slides": [ { "greet": "Hello" } ] }
-  ^D
-```
-  
-  - コマンドを実行
-```
-  python ~/git/pptx-template/pptx-template/cli.py --template template.pptx --out out.pptx --model model.json
+$ pip install pptx-template
+$ echo '{ "slides": [ { "greeting" : "Hello!!" } ] }' > model.json
+$ # prepare your template pptx which contains "{greering}" in somewhere
+$ pptx-template --out out.pptx --template test.pptx --model model.json
 ```
