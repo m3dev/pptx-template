@@ -15,7 +15,7 @@ import re
 import logging
 import pandas as pd
 
-import pptx_template.pyel
+import pptx_template.pyel as pyel
 
 log = logging.getLogger()
 

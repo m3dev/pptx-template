@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pptx-template',
-      version='0.1.0',
+      version='0.1.1',
       description='The PowerPoint presentation builder using template.pptx and data(json and csv)',
       url='http://github.com/m3dev/pptx-template',
       author='Reki Murakami',
@@ -20,4 +20,5 @@ setup(name='pptx-template',
         "Programming Language :: Python :: 3.5",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent"
-    ])
+     ]
+)
