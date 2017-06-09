@@ -1,10 +1,11 @@
 from setuptools import setup
+import io
 
 with io.open('README.rst', encoding='ascii') as fp:
     long_description = fp.read()
 
 setup(name='pptx-template',
-      version='0.1.1',
+      version='0.1.2',
       description='The PowerPoint presentation builder using template.pptx and data(json and csv)',
       long_description=long_description,
       url='http://github.com/m3dev/pptx-template',
@@ -12,6 +13,7 @@ setup(name='pptx-template',
       author_email='reki2000@gmail.com',
       license='Apache-2.0',
       packages=['pptx_template'],
+      test_suite='test',
       install_requires=['python-pptx==0.6.5', 'pandas>=0.18.0'],
       keywords=['powerpoint', 'ppt', 'pptx'],
       entry_points={ "console_scripts": [ "pptx_template=pptx_template.cli:main"]},
