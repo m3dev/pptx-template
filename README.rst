@@ -1,7 +1,7 @@
 pptx-template
 ============
 
-pptx-template is an PowerPoint presentation builder.
+pptx-template is a PowerPoint presentation builder.
 
 This helps your routine reporting work that have many manual copy-paste from excel chart to powerpoint, or so.
 

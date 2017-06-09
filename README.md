@@ -1,6 +1,6 @@
 # pptx-template
 
-pptx-template is an PowerPoint presentation builder.
+pptx-template is a PowerPoint presentation builder.
 
 This helps your routine reporting work that have many manual copy-paste from excel chart to powerpoint, or so.
 
@@ -27,6 +27,8 @@ TBD
 ```
 $ pip install pptx-template
 $ echo '{ "slides": [ { "greeting" : "Hello!!" } ] }' > model.json
-$ # prepare your template pptx which contains "{greering}" in somewhere
+
+# prepare your template file (test.pptx) which contains "{greeting}" in somewhere
+
 $ pptx-template --out out.pptx --template test.pptx --model model.json
 ```
