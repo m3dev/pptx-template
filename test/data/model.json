@@ -13,7 +13,9 @@
         "file_name": "chart1.csv",
         "value_axis_max": 150,
         "value_axis_min": 50
-      },
+      }
+    },
+    "3": {
       "xy": {}
     }
   },

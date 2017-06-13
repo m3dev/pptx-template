@@ -1,5 +1,4 @@
-Y,evaluation,shop0,shop1,shop2,shop3,dummy
-4,cost,1,2,3,4,0
-3,taste,2,3,4,5,0
-2,location,1,2,3,4,0
-1,comfort,1,2,3,4,0
+Y,X0,X1,X2
+10,1,2,3
+20,2,3,4
+30,1,2,3
