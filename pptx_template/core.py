@@ -60,15 +60,14 @@ def replace_el_in_shape_text(shape, model):
     log.info(u"found text_id: %s. replacing: %s" % (text_id, shape.text))
     shape.text = shape.text.replace(u"{%s}" % text_id, pyel.eval_el(text_id, model))
 
-
 def _build_xy_chart_data(csv):
   chart_data = XyChartData()
   for i in range(1, csv.columns.size):
-    col = csv.ix[:, i]
-    series = chart_data.add_series(col.name)
-    for (y,x) in col.iteritems():
-      log.debug(u"adding xy %d,%d" % (x,y))
-      series.add_data_point(x, y)
+    series = chart_data.add_series(csv.columns[i])
+    xy_col = csv.ix[:, [0, i]]
+    for (_, row) in xy_col.iterrows():
+      log.debug(u"adding xy %d,%d" % (row[1], row[0]))
+      series.add_data_point(row[1], row[0])
   return chart_data
 
 def _build_chart_data(csv):
