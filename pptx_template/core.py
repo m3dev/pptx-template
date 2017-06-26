@@ -190,6 +190,20 @@ def remove_slide_id(presentation, slide_id):
     if u"{id:%s}" % slide_id == shape.text:
       shape.text = ''
 
+def remove_all_slides_having_id(presentation):
+  """
+     {id:foobar} という文字列を持つすべてのスライドを削除する
+  """
+  id_frame_regex = re.compile(r"\{id:([A-Za-z0-9._\-]+)\}")
+  unused_slides = []
+  for slide in presentation.slides:
+    for shape in select_all_text_shapes(slide):
+      if id_frame_regex.search(shape.text):
+          unused_slides.append(slide)
+          break
+  for slide in unused_slides:
+    remove_slide(presentation, slide)
+
 
 def get_slide(presentation, slide_id):
   """

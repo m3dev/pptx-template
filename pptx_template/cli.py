@@ -11,7 +11,7 @@ from io import open
 from pptx import Presentation
 from six import iteritems
 
-from pptx_template.core import edit_slide, remove_slide, get_slide, remove_slide_id
+from pptx_template.core import edit_slide, remove_slide, get_slide, remove_slide_id, remove_all_slides_having_id
 
 def process_slide(ppt, slide, model):
   if model == u"remove":
@@ -49,6 +49,7 @@ def main():
       slide = get_slide(ppt, slide_id)
       remove_slide_id(ppt, slide_id)
       process_slide(ppt, slide, model)
+    remove_all_slides_having_id(ppt)
   elif isinstance(slides, list):
     for (model, slide) in zip(slides, ppt.slides):
       process_slide(ppt, slide, model)
