@@ -58,7 +58,12 @@ def replace_el_in_shape_text(shape, model):
     if not text_id:
       return
     log.info(u"found text_id: %s. replacing: %s" % (text_id, shape.text))
-    shape.text = shape.text.replace(u"{%s}" % text_id, pyel.eval_el(text_id, model))
+    replacing_text = pyel.eval_el(text_id, model)
+    if isinstance(replacing_text, str):
+      shape.text = shape.text.replace(u"{%s}" % text_id, replacing_text)
+    else:
+       log.error("Invalid value for id:%s, model:%s" % (text_id, replacing_text))
+       return
 
 def _build_xy_chart_data(csv):
   chart_data = XyChartData()
@@ -100,10 +105,7 @@ def set_value_axis(chart, chart_id, chart_setting):
     axis.minimum_scale = float(min)
 
 
-def replace_chart_data_with_csv(chart, chart_id, chart_setting):
-  """
-    1つのチャートに対して指定されたCSVからデータを読み込む。
-  """
+def load_csv_into_dataframe(chart_id, chart_setting):
   csv_body = chart_setting.get('body')
   if csv_body:
     csv_file_name = StringIO(csv_body)
@@ -114,7 +116,13 @@ def replace_chart_data_with_csv(chart, chart_id, chart_setting):
       csv_file_name = "%s.csv" % chart_id
     log.info(u"loading from csv file: %s" % csv_file_name)
 
-  csv = pd.read_csv(csv_file_name)
+  return pd.read_csv(csv_file_name)
+
+def replace_chart_data_with_csv(chart, chart_id, chart_setting):
+  """
+    1つのチャートに対して指定されたCSVからデータを読み込む。
+  """
+  csv = load_csv_into_dataframe(chart_id, chart_setting)
 
   if _is_xy_chart(chart):
     log.info(u"setting csv into XY chart %s" % chart_id)
