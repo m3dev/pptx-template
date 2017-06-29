@@ -6,7 +6,6 @@ from pptx.shapes.graphfrm import GraphicFrame
 from pptx.shapes.table import Table
 from pptx.chart.data import ChartData, XyChartData
 from pptx.enum.chart import XL_CHART_TYPE as ct
-from pptx.chart.axis import ValueAxis
 
 from io import StringIO
 import sys
@@ -16,6 +15,7 @@ import logging
 import pandas as pd
 
 import pptx_template.pyel as pyel
+import pptx_template.pptx_util as pptx_util
 
 log = logging.getLogger()
 
@@ -58,7 +58,12 @@ def replace_el_in_shape_text(shape, model):
     if not text_id:
       return
     log.info(u"found text_id: %s. replacing: %s" % (text_id, shape.text))
-    shape.text = shape.text.replace(u"{%s}" % text_id, pyel.eval_el(text_id, model))
+    replacing_text = pyel.eval_el(text_id, model)
+    if isinstance(replacing_text, str):
+      shape.text = shape.text.replace(u"{%s}" % text_id, replacing_text)
+    else:
+       log.error("Invalid value for id:%s, model:%s" % (text_id, replacing_text))
+       return
 
 def _build_xy_chart_data(csv):
   chart_data = XyChartData()
@@ -86,24 +91,10 @@ def set_value_axis(chart, chart_id, chart_setting):
   max = chart_setting.get('value_axis_max')
   min = chart_setting.get('value_axis_min')
 
-  if not max and not min:
-    return
-
-  axis = ValueAxis(chart._chartSpace.valAx_lst[0])
-
-  if max:
-    log.debug(u"setting chart %s value axis max: %s" % (chart_id, max))
-    axis.maximum_scale = float(max)
-
-  if min:
-    log.debug(u"setting chart %s value axis min: %s" % (chart_id, min))
-    axis.minimum_scale = float(min)
+  pptx_util.set_value_axis(chart, max = max, min = min)
 
 
-def replace_chart_data_with_csv(chart, chart_id, chart_setting):
-  """
-    1つのチャートに対して指定されたCSVからデータを読み込む。
-  """
+def load_csv_into_dataframe(chart_id, chart_setting):
   csv_body = chart_setting.get('body')
   if csv_body:
     csv_file_name = StringIO(csv_body)
@@ -114,7 +105,13 @@ def replace_chart_data_with_csv(chart, chart_id, chart_setting):
       csv_file_name = "%s.csv" % chart_id
     log.info(u"loading from csv file: %s" % csv_file_name)
 
-  csv = pd.read_csv(csv_file_name)
+  return pd.read_csv(csv_file_name)
+
+def replace_chart_data_with_csv(chart, chart_id, chart_setting):
+  """
+    1つのチャートに対して指定されたCSVからデータを読み込む。
+  """
+  csv = load_csv_into_dataframe(chart_id, chart_setting)
 
   if _is_xy_chart(chart):
     log.info(u"setting csv into XY chart %s" % chart_id)
@@ -175,10 +172,7 @@ def remove_slide(presentation, slide):
   """
    presentation から 指定した slide を削除する
   """
-  id = [ (i, s.rId) for i,s in enumerate(presentation.slides._sldIdLst) if s.id == slide.slide_id ][0]
-  log.info(u"removing slide #%d %s (rel_id: %s)" % (id[0], slide.slide_id, id[1]))
-  presentation.part.drop_rel(id[1])
-  del presentation.slides._sldIdLst[id[0]]
+  pptx_util.remove_slide(presentation, slide)
 
 
 def remove_slide_id(presentation, slide_id):
