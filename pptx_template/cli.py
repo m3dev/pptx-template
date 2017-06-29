@@ -41,7 +41,9 @@ def main():
     log.setLevel(logging.WARN)
 
   ppt = Presentation(opts.template)
-  model = json.load(open(opts.model, 'r', encoding='utf-8'))
+
+  with open(opts.model, 'r', encoding='utf-8') as f:
+    model = json.load(f)
 
   slides = model['slides']
   if isinstance(slides, dict):

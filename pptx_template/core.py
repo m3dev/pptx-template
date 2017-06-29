@@ -21,10 +21,19 @@ log = logging.getLogger()
 
 id_regex = re.compile(r"\{([A-Za-z0-9._\-]+)\}")
 
-def search_id(src):
-   text_id_match = id_regex.search(src)
-   if text_id_match:
-     return text_id_match.group(1)
+def iterate_ids(src):
+   pos = 0
+   while pos < len(src):
+       text_id_match = id_regex.search(src[pos:])
+       if text_id_match:
+         pos = pos + text_id_match.end(1) + 1
+         yield text_id_match.group(1)
+       else:
+         break;
+
+def search_first_id(src):
+   for id in iterate_ids(src):
+       return id
    return None
 
 
@@ -40,30 +49,45 @@ def select_all_tables(slide):
   return [ s.table for s in slide.shapes if isinstance(s, GraphicFrame) and s.shape_type == 19 ]
 
 
-def replace_el_in_table(table, model):
+def replace_all_els_in_table(table, model):
   """
    table の各セルの中に EL 形式があれば、それを model の該当する値と置き換える
   """
   for cell in [ cell for row in table.rows for cell in row.cells ]:
-    replace_el_in_shape_text(cell.text_frame, model)
+    replace_all_els_in_text_frame(cell.text_frame, model)
 
 
-def replace_el_in_shape_text(shape, model):
+def replace_el_in_text_frame_with_str(text_frame, text_id, replacing_str):
   """
-   shape.text の中に EL 形式が一つ以上あれば、それを model の該当する値と置き換える
+   text_frame の各 paragraph.run 中のテキストに指定の EL 形式があれば、それを replacing_str で置き換える
   """
+  text_id_el = u"{%s}" % text_id
+  for paragraph in text_frame.paragraphs:
+    for run in paragraph.runs:
+       if text_id_el in run.text:
+         log.info(u"found text_id {%s}. replacing with: %s" % (text_id, replacing_str))
+         run.text = run.text.replace(text_id_el, replacing_str)
+         return True
+  return False
 
-  while True:
-    text_id = search_id(shape.text)
-    if not text_id:
-      return
-    log.info(u"found text_id: %s. replacing: %s" % (text_id, shape.text))
+def replace_all_els_in_text_frame(text_frame, model):
+  """
+   text_frame 中のテキストに EL 形式が一つ以上あれば、それを model の該当する値と置き換える
+   異なるフォントを含む、スペルチェック警告があるなどの理由で、一つの EL 形式が複数の run に分断されることがあるため、その場合は解決のための警告を出す
+  """
+  for text_id in iterate_ids(text_frame.text):
     replacing_text = pyel.eval_el(text_id, model)
-    if isinstance(replacing_text, str):
-      shape.text = shape.text.replace(u"{%s}" % text_id, replacing_text)
-    else:
-       log.error("Invalid value for id:%s, model:%s" % (text_id, replacing_text))
-       return
+    if not replacing_text:
+      log.error(u"Cannot find model value for {%s}" % text_id)
+      continue
+
+    if not isinstance(replacing_text, str):
+      log.error(u"Invalid value for {%s}, model: %s" % (text_id, replacing_text))
+      continue
+
+    if not replace_el_in_text_frame_with_str(text_frame, text_id, replacing_text):
+      log.error(u"Cannot find {%s} in one text-run. To fix this, select this whole EL [%s] and reset font size by clicking size up then down" % (text_id, text_frame.text))
+
 
 def _build_xy_chart_data(csv):
   chart_data = XyChartData()
@@ -146,9 +170,9 @@ def edit_slide(slide, model):
 
   # pptx内の TextFrame の EL表記を model の値で置換する
   for shape in select_all_text_shapes(slide):
-    replace_el_in_shape_text(shape, model)
+    replace_all_els_in_text_frame(shape.text_frame, model)
   for shape in select_all_tables(slide):
-    replace_el_in_table(shape, model)
+    replace_all_els_in_table(shape, model)
 
   # pptx内の 各チャートに対してcsvの値を設定する
   for chart in select_all_chart_shapes(slide):
@@ -157,7 +181,7 @@ def edit_slide(slide, model):
       continue
 
     title_frame = chart.chart_title.text_frame
-    chart_id = search_id(title_frame.text)
+    chart_id = search_first_id(title_frame.text)
     if not chart_id:
       continue
     chart_setting = pyel.eval_el(chart_id, model)
