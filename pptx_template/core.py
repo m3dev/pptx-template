@@ -6,7 +6,6 @@ from pptx.shapes.graphfrm import GraphicFrame
 from pptx.shapes.table import Table
 from pptx.chart.data import ChartData, XyChartData
 from pptx.enum.chart import XL_CHART_TYPE as ct
-from pptx.chart.axis import ValueAxis
 
 from io import StringIO
 import sys
@@ -16,6 +15,7 @@ import logging
 import pandas as pd
 
 import pptx_template.pyel as pyel
+import pptx_template.pptx_util as pptx_util
 
 log = logging.getLogger()
 
@@ -91,18 +91,7 @@ def set_value_axis(chart, chart_id, chart_setting):
   max = chart_setting.get('value_axis_max')
   min = chart_setting.get('value_axis_min')
 
-  if not max and not min:
-    return
-
-  axis = ValueAxis(chart._chartSpace.valAx_lst[0])
-
-  if max:
-    log.debug(u"setting chart %s value axis max: %s" % (chart_id, max))
-    axis.maximum_scale = float(max)
-
-  if min:
-    log.debug(u"setting chart %s value axis min: %s" % (chart_id, min))
-    axis.minimum_scale = float(min)
+  pptx_util.set_value_axis(chart, max = max, min = min)
 
 
 def load_csv_into_dataframe(chart_id, chart_setting):
@@ -183,10 +172,7 @@ def remove_slide(presentation, slide):
   """
    presentation から 指定した slide を削除する
   """
-  id = [ (i, s.rId) for i,s in enumerate(presentation.slides._sldIdLst) if s.id == slide.slide_id ][0]
-  log.info(u"removing slide #%d %s (rel_id: %s)" % (id[0], slide.slide_id, id[1]))
-  presentation.part.drop_rel(id[1])
-  del presentation.slides._sldIdLst[id[0]]
+  pptx_util.remove_slide(presentation, slide)
 
 
 def remove_slide_id(presentation, slide_id):
