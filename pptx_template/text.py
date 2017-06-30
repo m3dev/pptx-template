@@ -11,39 +11,39 @@ from pptx.shapes.table import Table
 
 log = logging.getLogger()
 
-id_regex = re.compile(r"\{([A-Za-z0-9._\-]+)\}")
+el_regex = re.compile(r"\{([A-Za-z0-9._\-]+)\}")
 
-id_frame_regex = re.compile(r"\{id:([A-Za-z0-9._\-]+)\}")
+slide_id_regex = re.compile(r"\{id:([A-Za-z0-9._\-]+)\}")
 
 def extract_slide_id(text):
-    match = id_frame_regex.search(text)
+    match = slide_id_regex.search(text)
     if match:
         return match.group(1)
     else:
         return None
 
-def iterate_els(src):
+def iterate_els(text):
    pos = 0
-   while pos < len(src):
-       text_id_match = id_regex.search(src[pos:])
+   while pos < len(text):
+       text_id_match = el_regex.search(text[pos:])
        if text_id_match:
          pos = pos + text_id_match.end(1) + 1
          yield text_id_match.group(1)
        else:
          break;
 
-def search_first_el(src):
-   for id in iterate_els(src):
+def search_first_el(text):
+   for id in iterate_els(text):
        return id
    return None
 
 
 def select_all_text_shapes(slide):
-  return [ s for s in slide.shapes if s.shape_type in [1,14,17] ]
+    return [ s for s in slide.shapes if s.shape_type in [1,14,17] ]
 
 
 def select_all_tables(slide):
-  return [ s.table for s in slide.shapes if isinstance(s, GraphicFrame) and s.shape_type == 19 ]
+    return [ s.table for s in slide.shapes if isinstance(s, GraphicFrame) and s.shape_type == 19 ]
 
 
 def replace_all_els_in_table(table, model):
@@ -66,11 +66,10 @@ def replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
              log.info(u"found text_id {%s}. replacing with: %s" % (el, replacing_text))
              run.text = run.text.replace(placeholder, replacing_text)
              return True
+
         # if not found, do force replacement with breaking its font style
-        log.warn(u"found text_id {%s} but requires font style break. replacing with: %s" % (el, replacing_text))
-        first_run_font = paragraph.runs[0].font
-        paragraph.text = paragraph.text.replace(placeholder, raplacing_text)
-        paragraph.runs[0].font = first_run_font
+        log.warning(u"found text_id {%s} but requires font style break. replacing with: %s" % (el, replacing_text))
+        paragraph.text = paragraph.text.replace(placeholder, replacing_text)
         return True
   return False
 
