@@ -23,7 +23,7 @@ def _build_xy_chart_data(csv):
   chart_data = XyChartData()
   for i in range(1, csv.columns.size):
     series = chart_data.add_series(csv.columns[i])
-    xy_col = csv.ix[:, [0, i]]
+    xy_col = csv.iloc[:, [0, i]]
     for (_, row) in xy_col.iterrows():
       log.debug(u"adding xy %d,%d" % (row[1], row[0]))
       series.add_data_point(row[1], row[0])
@@ -32,7 +32,7 @@ def _build_xy_chart_data(csv):
 def _build_chart_data(csv):
   chart_data = ChartData()
   for i in range(1, csv.columns.size):
-    col = csv.ix[:, i]
+    col = csv.iloc[:, i]
     log.debug(u"adding series %s" % (col.name))
     chart_data.add_series(col.name, col.values.tolist())
   return chart_data
