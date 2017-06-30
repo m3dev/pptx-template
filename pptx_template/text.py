@@ -4,6 +4,8 @@
 import logging
 import re
 
+from six import string_types
+
 import pptx_template.pyel as pyel
 
 from pptx.shapes.graphfrm import GraphicFrame
@@ -32,6 +34,10 @@ def iterate_els(text):
        else:
          break;
 
+def el_to_placeholder(el):
+    return u"{%s}" % el
+
+
 def search_first_el(text):
    for id in iterate_els(text):
        return id
@@ -58,7 +64,7 @@ def replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
   """
    text_frame の各 paragraph.run 中のテキストに指定の EL 形式があれば、それを replacing_text で置き換える
   """
-  placeholder = u"{%s}" % el
+  placeholder = el_to_placeholder(el)
   for paragraph in text_frame.paragraphs:
     if placeholder in paragraph.text:
         for run in paragraph.runs:
@@ -84,7 +90,7 @@ def replace_all_els_in_text_frame(text_frame, model):
       log.error(u"Cannot find model value for {%s}" % el)
       continue
 
-    if not isinstance(replacing_text, str):
+    if not isinstance(replacing_text, string_types):
       log.error(u"Invalid value for {%s}, model: %s" % (el, replacing_text))
       continue
 

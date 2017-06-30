@@ -21,7 +21,9 @@ def process_slide(ppt, slide, model):
 
 def main():
   if sys.version_info[0] == 2:
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+    # sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
 
   log = logging.getLogger()
   handler = logging.StreamHandler()
@@ -45,7 +47,7 @@ def main():
   with open(opts.model, 'r', encoding='utf-8') as f:
     model = json.load(f)
 
-  slides = model['slides']
+  slides = model[u'slides']
   if isinstance(slides, dict):
     for (slide_id, model) in iteritems(slides):
       slide = get_slide(ppt, slide_id)
