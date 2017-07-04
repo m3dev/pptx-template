@@ -1,5 +1,7 @@
 # pptx-template
 
+## Overview
+
 pptx-template is a PowerPoint presentation builder.
 
 This helps your routine reporting work that have many manual copy-paste from excel chart to powerpoint, or so.
@@ -10,7 +12,13 @@ This helps your routine reporting work that have many manual copy-paste from exc
   - requires python envirionment (2 or 3), pandas, python-pptx
   - for now, only UTF-8 encoding is supported for json, csv
 
-below is Japanese transation:
+### Text substitution
+!<img src="docs/01.png?raw=true" width="80%" />
+
+### CSV Import
+!<img src="docs/02.png?raw=true" width="80%" />
+
+## Japanese translation
 
 pptx-template は pptx のテンプレートを元に、別途用意した JSON 中の文字列や CSV データを差し込んだ pptx を生成するツールです。
 
