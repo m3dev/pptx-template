@@ -44,7 +44,8 @@ def _is_xy_chart(chart):
 def _set_value_axis(chart, chart_id, chart_setting):
   max = chart_setting.get('value_axis_max')
   min = chart_setting.get('value_axis_min')
-  util.set_value_axis(chart, max = max, min = min)
+  if max or min:
+    util.set_value_axis(chart, max = max, min = min)
 
 def _load_csv_into_dataframe(chart_id, chart_setting):
   csv_body = chart_setting.get('body')
