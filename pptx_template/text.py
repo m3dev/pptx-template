@@ -69,7 +69,7 @@ def replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
     if not placeholder in paragraph.text:
         continue
 
-    log.debug(u"replacing runs: %s" % ([r.text for r in paragraph.runs]))
+    original_run_for_debug_log = [r.text for r in paragraph.runs]
     ((start_run, start_pos), (end_run, end_pos)) = find_el_position([r.text for r in paragraph.runs], el)
     for (i, run) in enumerate(paragraph.runs):
         if i == start_run and i == end_run:
@@ -81,7 +81,7 @@ def replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
             break
         elif start_run < i and i < end_run:
             run.text = ''
-    log.debug(u"replaced runs: %s" % ([r.text for r in paragraph.runs]))
+    log.debug(u"replaced text: %s  --> %s" % (original_run_for_debug_log, [r.text for r in paragraph.runs]))
     return True
   return False
 
