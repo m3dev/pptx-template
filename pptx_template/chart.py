@@ -2,6 +2,7 @@
 # coding=utf-8
 
 import logging
+import os.path
 from io import StringIO
 
 from pptx.shapes.graphfrm import GraphicFrame
@@ -50,15 +51,23 @@ def _set_value_axis(chart, chart_id, chart_setting):
 def _load_csv_into_dataframe(chart_id, chart_setting):
   csv_body = chart_setting.get('body')
   if csv_body:
-    csv_file_name = StringIO(csv_body)
+    csv_body_file = StringIO(csv_body)
     log.info(u"Loading from csv string: %s" % csv_body)
+    return pd.read_csv(csv_body_file)
   else:
     csv_file_name = chart_setting.get('file_name')
     if not csv_file_name:
-      csv_file_name = "%s.csv" % chart_id
-    log.info(u"Loading from csv file: %s" % csv_file_name)
+      for ext in ['csv', 'tsv']:
+        csv_file_name = "%s.%s" % (chart_id, ext)
+        if os.path.isfile(csv_file_name):
+          break
+      else:
+        raise ValueError("File not found: csv or tsv for %s" % chart_id)
 
-  return pd.read_csv(csv_file_name)
+    log.info(u"Loading from csv file: %s" % csv_file_name)
+    delimiter = '\t' if csv_file_name.endswith('.tsv') else ','
+    return pd.read_csv(csv_file_name, delimiter=delimiter)
+
 
 def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
   """
