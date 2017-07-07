@@ -52,6 +52,7 @@ def main():
     for (slide_id, model) in iteritems(slides):
       slide = get_slide(ppt, slide_id)
       remove_slide_id(ppt, slide_id)
+      log.info("Processing slide_id: %s" % slide_id)
       process_slide(ppt, slide, model)
     remove_all_slides_having_id(ppt)
   elif isinstance(slides, list):

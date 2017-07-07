@@ -27,8 +27,6 @@ def edit_slide(slide, model):
      - (TBI) file_encoding: CSVファイルのエンコーディング。省略時は utf-8
   """
 
-  log.info("processing %s" % slide)
-
   # pptx内の TextFrame の EL表記を model の値で置換する
   for shape in txt.select_all_text_shapes(slide):
     txt.replace_all_els_in_text_frame(shape.text_frame, model)
@@ -63,10 +61,12 @@ def remove_all_slides_having_id(presentation):
   unused_slides = []
   for slide in presentation.slides:
     for shape in txt.select_all_text_shapes(slide):
-      if txt.extract_slide_id(shape.text):
-          unused_slides.append(slide)
+      slide_id = txt.extract_slide_id(shape.text)
+      if slide_id:
+          unused_slides.append((slide_id, slide))
           break
-  for slide in unused_slides:
+  for slide_id, slide in unused_slides:
+    log.info("Removing unused slide_id: %s" % slide_id)
     remove_slide(presentation, slide)
 
 
