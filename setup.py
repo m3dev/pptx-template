@@ -5,7 +5,7 @@ with io.open('README.rst', encoding='ascii') as fp:
     long_description = fp.read()
 
 setup(name='pptx-template',
-      version='0.1.8',
+      version='0.1.9',
       description='The PowerPoint presentation builder using template.pptx and data(json and csv)',
       long_description=long_description,
       url='http://github.com/m3dev/pptx-template',

@@ -81,7 +81,7 @@ def replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
             break
         elif start_run < i and i < end_run:
             run.text = ''
-    log.debug(u"replaced text: %s  --> %s" % (original_run_for_debug_log, [r.text for r in paragraph.runs]))
+    log.debug(u" Replaced text: %s  --> %s" % (original_run_for_debug_log, [r.text for r in paragraph.runs]))
     return True
   return False
 
@@ -113,7 +113,7 @@ def find_el_position(texts, el):
 
     start_pos = full_text.find(placeholder)
     if start_pos < 0:
-        raise ValueError(u"texts %s doesn't contain el:%s" % (texts, el))
+        raise ValueError(u"texts %s doesn't contain EL:%s" % (texts, el))
     end_pos   = start_pos + len(placeholder) - 1
 
     start_run_pos = start_run_index = end_run_pos = end_run_index = -1

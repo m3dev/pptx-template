@@ -2,6 +2,7 @@
 # coding=utf-8
 
 import logging
+import os.path
 from io import StringIO
 
 from pptx.shapes.graphfrm import GraphicFrame
@@ -22,18 +23,18 @@ def _build_xy_chart_data(csv):
     series = chart_data.add_series(csv.columns[i])
     xy_col = csv.iloc[:, [0, i]]
     for (_, row) in xy_col.iterrows():
-      log.debug(u"Adding xy %d,%d" % (row[1], row[0]))
+      log.debug(u" Adding xy %d,%d" % (row[1], row[0]))
       series.add_data_point(row[1], row[0])
   return chart_data
 
 def _build_chart_data(csv):
   chart_data = ChartData()
-  log.debug(u"Setting categories with values:%s" % (csv.iloc[:,0].values.tolist()))
+  log.debug(u" Setting categories with values:%s" % (csv.iloc[:,0].values.tolist()))
   chart_data.categories = csv.iloc[:,0].values.tolist()
 
   for i in range(1, csv.columns.size):
     col = csv.iloc[:, i]
-    log.debug(u"Adding series:%s" % (col.name))
+    log.debug(u" Adding series:%s" % (col.name))
     chart_data.add_series(col.name, col.values.tolist())
   return chart_data
 
@@ -50,15 +51,23 @@ def _set_value_axis(chart, chart_id, chart_setting):
 def _load_csv_into_dataframe(chart_id, chart_setting):
   csv_body = chart_setting.get('body')
   if csv_body:
-    csv_file_name = StringIO(csv_body)
+    csv_body_file = StringIO(csv_body)
     log.info(u"Loading from csv string: %s" % csv_body)
+    return pd.read_csv(csv_body_file)
   else:
     csv_file_name = chart_setting.get('file_name')
     if not csv_file_name:
-      csv_file_name = "%s.csv" % chart_id
-    log.info(u"Loading from csv file: %s" % csv_file_name)
+      for ext in ['csv', 'tsv']:
+        csv_file_name = "%s.%s" % (chart_id, ext)
+        if os.path.isfile(csv_file_name):
+          break
+      else:
+        raise ValueError("File not found: csv or tsv for %s" % chart_id)
 
-  return pd.read_csv(csv_file_name)
+    log.info(u"Loading from csv file: %s" % csv_file_name)
+    delimiter = '\t' if csv_file_name.endswith('.tsv') else ','
+    return pd.read_csv(csv_file_name, delimiter=delimiter)
+
 
 def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
   """
@@ -67,15 +76,15 @@ def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
   csv = _load_csv_into_dataframe(chart_id, chart_setting)
 
   if _is_xy_chart(chart):
-    log.info(u"setting csv into XY chart %s" % chart_id)
+    log.info(u"Setting csv/tsv into XY chart_id: %s" % chart_id)
     chart_data = _build_xy_chart_data(csv)
   else:
-    log.info(u"setting csv int chart %s" % chart_id)
+    log.info(u"Setting csv/tsv into chart_id: %s" % chart_id)
     chart_data = _build_chart_data(csv)
 
   chart.replace_data(chart_data)
 
-  log.info(u"chart data replacement completed.")
+  log.info(u"Completed chart data replacement.")
 
   return
 
@@ -91,7 +100,7 @@ def load_data_into_chart(chart, model):
       return
 
     chart_setting = pyel.eval_el(chart_id, model)
-    log.info(u"found chart_id: %s. setting: %s" % (chart_id, chart_setting))
+    log.info(u"Found chart_id: %s, chart_setting: %s" % (chart_id, chart_setting))
 
     txt.replace_el_in_text_frame_with_str(title_frame, chart_id, '')
     _replace_chart_data_with_csv(chart, chart_id, chart_setting)
