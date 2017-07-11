@@ -3,6 +3,7 @@
 
 import logging
 import re
+import numbers
 
 from six import string_types
 
@@ -88,17 +89,20 @@ def replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
 def replace_all_els_in_text_frame(text_frame, model):
   """
    text_frame 中のテキストに EL 形式が一つ以上あれば、それを model の該当する値と置き換える
-   異なるフォントを含む、スペルチェック警告があるなどの理由で、一つの EL 形式が複数の run に分断されることがあるため、その場合は解決のための警告を出す
   """
   for el in iterate_els(text_frame.text):
-    replacing_text = pyel.eval_el(el, model)
-    if not replacing_text:
+    value = pyel.eval_el(el, model)
+    if not value:
       log.error(u"Cannot find model value for {%s}" % el)
       continue
 
-    if not isinstance(replacing_text, string_types):
-      log.error(u"Invalid value for {%s}, model: %s" % (el, replacing_text))
+    if isinstance(value, numbers.Number):
+      replacing_text = str(value)
+    elif not isinstance(value, string_types):
+      log.error(u"Invalid value for {%s}, model: %s" % (el, value))
       continue
+    else:
+      replacing_text = value
 
     if not replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
       log.error(u"Cannot find {%s} in one text-run. To fix this, select this whole EL [%s] and reset font size by clicking size up then down" % (text_id, text_frame.text))
