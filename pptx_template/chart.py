@@ -19,7 +19,10 @@ import pptx_template.pptx_util as util
 log = logging.getLogger()
 
 def _nan_to_none(x):
-  return None if np.isnan(x) else x
+  log.debug(u" type of x:%s is:%s" % (x, type(x)))
+  if isinstance(x, np.generic):
+      return None if np.isnan(x) else x
+  return x
 
 def _build_xy_chart_data(csv):
   chart_data = XyChartData()
@@ -35,7 +38,9 @@ def _build_xy_chart_data(csv):
 def _build_chart_data(csv):
   chart_data = ChartData()
   log.debug(u" Setting categories with values:%s" % (csv.iloc[:,0].values.tolist()))
-  chart_data.categories = csv.iloc[:,0].values.tolist()
+  categories = [_nan_to_none(x) for x in csv.iloc[:,0].values]
+  categories = [x if x else '-' for x in categories]
+  chart_data.categories = categories
 
   for i in range(1, csv.columns.size):
     col = csv.iloc[:, i]
