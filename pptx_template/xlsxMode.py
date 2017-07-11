@@ -7,7 +7,9 @@ import logging
 import argparse
 import json
 
+import re
 from io import open
+
 import openpyxl as xl
 from six import iteritems, moves
 from itertools import islice
@@ -52,6 +54,33 @@ def write_tsv(file_name, list_of_list):
          tsv.write("\n")
      tsv.close()
 
+FRACTIONAL_PART_RE = re.compile(u"\.(0+)")
+
+def format_cell_value(cell):
+    """
+    for expample, a value 123.4567 will be formatted along with its cell.number_format:
+      0     -> "123"
+      0.00  -> "123.46"
+      0%    -> "12345%"
+      0.00% -> "12345.68%"
+      other -> 123.4567     # numeric type
+    """
+    value = cell.value
+    format = cell.number_format
+    unit = ''
+    if '%' in cell.format:
+        value = value * 100
+        unit = '%'
+
+    match = FRACTIONAL_PART_RE.search(format)
+    if match:
+        fraction_format = "%%.%df%%s" % len(match.group(1))
+        return fraction_format % (value, unit)
+    elif '0' in format:
+        return "%d%s" % (value, unit)
+    else:
+        return value
+
 def extract_row(slides, xls, slide_id, el, value, range_name, options):
   log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value, range_name, options))
   if value == None and range_name != None:
@@ -60,6 +89,7 @@ def extract_row(slides, xls, slide_id, el, value, range_name, options):
       tsv = build_tsv([xls[sheet][cords] for sheet, cords in destinations], side_by_side = 'S' in options, transpose = 'T' in options)
       write_tsv(file_name, tsv)
       value = {"file_name": file_name}
+
   return pyel.set_value(slides, u"%s.%s" % (slide_id, el), value)
 
 def main():
