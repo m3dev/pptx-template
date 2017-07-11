@@ -10,6 +10,7 @@ from pptx.chart.data import ChartData, XyChartData
 from pptx.enum.chart import XL_CHART_TYPE as ct
 
 import pandas as pd
+import numpy as np
 
 import pptx_template.pyel as pyel
 import pptx_template.text as txt
@@ -17,14 +18,18 @@ import pptx_template.pptx_util as util
 
 log = logging.getLogger()
 
+def _nan_to_none(x):
+  return None if np.isnan(x) else x
+
 def _build_xy_chart_data(csv):
   chart_data = XyChartData()
   for i in range(1, csv.columns.size):
     series = chart_data.add_series(csv.columns[i])
     xy_col = csv.iloc[:, [0, i]]
     for (_, row) in xy_col.iterrows():
-      log.debug(u" Adding xy %d,%d" % (row[1], row[0]))
-      series.add_data_point(row[1], row[0])
+      x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
+      log.debug(u" Adding xy %s,%s" % (y, x))
+      series.add_data_point(y, x)
   return chart_data
 
 def _build_chart_data(csv):
@@ -34,8 +39,9 @@ def _build_chart_data(csv):
 
   for i in range(1, csv.columns.size):
     col = csv.iloc[:, i]
-    log.debug(u" Adding series:%s" % (col.name))
-    chart_data.add_series(col.name, col.values.tolist())
+    values = [_nan_to_none(x) for x in col.values]
+    log.debug(u" Adding series:%s values:%s" % (col.name, values))
+    chart_data.add_series(col.name, values)
   return chart_data
 
 def _is_xy_chart(chart):
