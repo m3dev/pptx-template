@@ -14,11 +14,14 @@ import openpyxl as xl
 from six import iteritems, moves
 from itertools import islice
 
+from six import string_types
+import numbers
+
 import pptx_template.pyel as pyel
 
 log = logging.getLogger()
 
-def build_tsv(rect_list, side_by_side=False, transpose=False):
+def build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False):
     """
     Excel の範囲名（複数セル範囲）から一つの二次元配列を作る
     rect_list:    セル範囲自体の配列
@@ -28,12 +31,20 @@ def build_tsv(rect_list, side_by_side=False, transpose=False):
     result = []
     for rect_index, rect in enumerate(rect_list):
         for row_index, row in enumerate(rect):
+            line = []
+            for cell in row:
+                value = cell
+                if not cell:
+                    value = None
+                elif hasattr(cell, 'value'):
+                    value = format_cell_value(cell) if format_cell else cell.value
+                else:
+                    raise ValueError("Unknown type %s for %s" % (type(cell), cell))
+                line.append(value)
             if side_by_side and rect_index > 0:
-                line = result[row_index]
-                for cell in row:
-                    line.append(cell)
+                result[row_index].extend(line)
             else:
-                result.append(list(row))
+                result.append(line)
 
     if transpose:
         result = [list(row) for row in moves.zip_longest(*result, fillvalue=None)] # idiom for transpose
@@ -44,11 +55,11 @@ def write_tsv(file_name, list_of_list):
      log.info("writing tsv %s..." % file_name)
      tsv = open(file_name, encoding='utf-8', mode='w')
      for row in list_of_list:
-         for col, cell in enumerate(row):
+         for col, value in enumerate(row):
             if col != 0:
                 tsv.write("\t")
-            if cell.value != None:
-                tsv.write(str(cell.value))
+            if value != None:
+                tsv.write(str(value))
             else:
                 tsv.write('')
          tsv.write("\n")
@@ -65,12 +76,14 @@ def format_cell_value(cell):
       0.00% -> "12345.68%"
       other -> 123.4567     # numeric type
     """
-    value = cell.value
-    format = cell.number_format
-    unit = ''
-    if '%' in cell.format:
-        value = value * 100
-        unit = '%'
+    value, unit = cell.value, ''
+    format = cell.number_format if cell.number_format else ''
+
+    if not isinstance(value, numbers.Number):
+        return value
+
+    if '%' in format:
+        value, unit = value * 100, '%'
 
     match = FRACTIONAL_PART_RE.search(format)
     if match:
@@ -81,16 +94,27 @@ def format_cell_value(cell):
     else:
         return value
 
-def extract_row(slides, xls, slide_id, el, value, range_name, options):
-  log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value, range_name, options))
-  if value == None and range_name != None:
-      file_name = u"%s-%s.tsv" % (slide_id, el)
-      destinations = xls.defined_names[range_name].destinations
-      tsv = build_tsv([xls[sheet][cords] for sheet, cords in destinations], side_by_side = 'S' in options, transpose = 'T' in options)
-      write_tsv(file_name, tsv)
-      value = {"file_name": file_name}
+def extract_row(slides, xls, slide_id, el, cell, range_name, options):
+  log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, cell.value, range_name, options))
 
-  return pyel.set_value(slides, u"%s.%s" % (slide_id, el), value)
+  model_value = None
+  if cell.value:
+      model_value = format_cell_value(cell)
+  elif range_name:
+      file_name = u"%s-%s.tsv" % (slide_id, el)
+      rects = [xls[sheet][cords] for sheet, cords in xls.defined_names[range_name].destinations]
+      array_mode = u"Array" in options
+      tsv = build_tsv(rects, side_by_side = u"SideBySide" in options, transpose = u"Transpose" in options, format_cell = array_mode)
+
+      if array_mode:
+          model_value = tsv
+      else:
+          write_tsv(file_name, tsv)
+          model_value = {"file_name": file_name}
+  else:
+       raise ValueError("One of value or range_name required.")
+
+  return pyel.set_value(slides, u"%s.%s" % (slide_id, el), model_value)
 
 def main():
   if sys.version_info[0] == 2:
@@ -118,9 +142,11 @@ def main():
 
   slides = {}
   for row in islice(model_sheet.rows, 1, None):
-      slide_id, el, value, range_name, options = row[0].value, row[1].value, row[2].value, row[3].value, row[4].value
+      slide_id, el, cell, range_name, options = row[0].value, row[1].value, row[2], row[3].value, row[4].value
+      if not slide_id or slide_id[0] == '#':
+          continue
       options = options.split(' ,') if options else []
-      slides = extract_row(slides, xls, slide_id, el, value, range_name, options)
+      slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
 
   log.info(u"writing model data:%s" % {"slides": slides})
   model_file = open('model.json', mode='w', encoding='utf-8')
