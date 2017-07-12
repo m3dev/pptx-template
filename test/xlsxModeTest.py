@@ -1,8 +1,13 @@
 import unittest
 import sys
 import os
+import tempfile
+import shutil
 
-from pptx_template.xlsxMode import build_tsv, format_cell_value
+from itertools import islice
+
+from pptx_template.xlsxMode import build_tsv, format_cell_value, generate_whole_model
+import openpyxl as xl
 
 class Cell:
   def __init__(self, value, number_format):
@@ -33,6 +38,46 @@ class MyTest(unittest.TestCase):
       self.assertEqual("123.5", format_cell_value(Cell(123.45678, '0.0_')))
       self.assertEqual("12345.7%", format_cell_value(Cell(123.45678, '0.0%_')))
       self.assertEqual("12345%", format_cell_value(Cell(123.45678, '0%_')))
+
+  def test_generate_whole_model(self):
+      def read_expect(name):
+          file_name = os.path.join(os.path.dirname(__file__), 'data2', name)
+          f = open(file_name, mode = 'r', encoding = 'utf-8')
+          result = f.read()
+          f.close()
+          return result
+
+      def read_result(name):
+          f = open(os.path.join(temp_dir, name), mode = 'r', encoding = 'utf-8')
+          result = f.read()
+          f.close()
+          return result
+
+      xls_file = os.path.join(os.path.dirname(__file__), 'data2', 'in.xlsx')
+      xls = xl.load_workbook(xls_file, read_only=True, data_only=True)
+      model_sheet = xls['model']
+
+      temp_dir = tempfile.mkdtemp()
+      current_dir = os.getcwd()
+      try:
+          os.chdir(temp_dir)
+
+          slides = generate_whole_model(xls, islice(model_sheet.rows, 1, None), {})
+
+          self.assertEqual({'file_name': 'p02-normal.tsv'}, slides['p02']['normal'])
+          self.assertEqual({'file_name': 'p02-sidebyside.tsv'}, slides['p02']['sidebyside'])
+          self.assertEqual({'file_name': 'p02-transpose.tsv'}, slides['p02']['transpose'])
+          self.assertEqual('Hello!', slides['p01']['greeting']['en'])
+          self.assertEqual('こんにちは！', slides['p01']['greeting']['ja'])
+          self.assertEqual([['Season', '売り上げ', '利益', '利益率'],['春', 100, 50, 0.5],['夏', 110, 60, 0.5],['秋', 120, 70, 0.5]], slides['p02']['array'])
+
+          self.assertEqual(read_expect('p02-normal.tsv'), read_result('p02-normal.tsv'))
+          self.assertEqual(read_expect('p02-transpose.tsv'), read_result('p02-transpose.tsv'))
+          self.assertEqual(read_expect('p02-sidebyside.tsv'), read_result('p02-sidebyside.tsv'))
+
+      finally:
+          os.chdir(current_dir)
+          shutil.rmtree(temp_dir)
 
 
 if __name__ == '__main__':

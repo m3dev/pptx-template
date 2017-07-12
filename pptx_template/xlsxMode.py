@@ -116,6 +116,17 @@ def extract_row(slides, xls, slide_id, el, cell, range_name, options):
 
   return pyel.set_value(slides, u"%s.%s" % (slide_id, el), model_value)
 
+
+def generate_whole_model(xls, model_rows, slides):
+  for row in model_rows:
+      slide_id, el, cell, range_name, options = row[0].value, row[1].value, row[2], row[3].value, row[4].value
+      if not slide_id or slide_id[0] == '#':
+          continue
+      options = options.split(' ,') if options else []
+      slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
+  return slides
+
+
 def main():
   if sys.version_info[0] == 2:
     # sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
@@ -140,13 +151,7 @@ def main():
   xls = xl.load_workbook(opts.xlsx, read_only=True, data_only=True)
   model_sheet = xls['model']
 
-  slides = {}
-  for row in islice(model_sheet.rows, 1, None):
-      slide_id, el, cell, range_name, options = row[0].value, row[1].value, row[2], row[3].value, row[4].value
-      if not slide_id or slide_id[0] == '#':
-          continue
-      options = options.split(' ,') if options else []
-      slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
+  slides = build_whole_model(xls, islice(model_sheet.rows, 1, None), {})
 
   log.info(u"writing model data:%s" % {"slides": slides})
   model_file = open('model.json', mode='w', encoding='utf-8')
