@@ -1,8 +1,11 @@
+#
+# coding=utf-8
 import unittest
 import sys
 import os
 import tempfile
 import shutil
+from io import open
 
 from itertools import islice
 
@@ -64,12 +67,12 @@ class MyTest(unittest.TestCase):
 
           slides = generate_whole_model(xls, islice(model_sheet.rows, 1, None), {})
 
-          self.assertEqual({'file_name': 'p02-normal.tsv'}, slides['p02']['normal'])
-          self.assertEqual({'file_name': 'p02-sidebyside.tsv'}, slides['p02']['sidebyside'])
-          self.assertEqual({'file_name': 'p02-transpose.tsv'}, slides['p02']['transpose'])
-          self.assertEqual('Hello!', slides['p01']['greeting']['en'])
-          self.assertEqual('こんにちは！', slides['p01']['greeting']['ja'])
-          self.assertEqual([['Season', '売り上げ', '利益', '利益率'],['春', 100, 50, 0.5],['夏', 110, 60, 0.5],['秋', 120, 70, 0.5]], slides['p02']['array'])
+          self.assertEqual({u'file_name': 'p02-normal.tsv'}, slides['p02']['normal'])
+          self.assertEqual({u'file_name': 'p02-sidebyside.tsv'}, slides['p02']['sidebyside'])
+          self.assertEqual({u'file_name': 'p02-transpose.tsv'}, slides['p02']['transpose'])
+          self.assertEqual(u'Hello!', slides['p01']['greeting']['en'])
+          self.assertEqual(u'こんにちは！', slides['p01']['greeting']['ja'])
+          self.assertEqual([['Season', u'売り上げ', u'利益', u'利益率'],[u'春', 100, 50, 0.5],[u'夏', 110, 60, 0.5],[u'秋', 120, 70, 0.5]], slides['p02']['array'])
 
           self.assertEqual(read_expect('p02-normal.tsv'), read_result('p02-normal.tsv'))
           self.assertEqual(read_expect('p02-transpose.tsv'), read_result('p02-transpose.tsv'))
@@ -78,7 +81,6 @@ class MyTest(unittest.TestCase):
       finally:
           os.chdir(current_dir)
           shutil.rmtree(temp_dir)
-
 
 if __name__ == '__main__':
     unittest.main()

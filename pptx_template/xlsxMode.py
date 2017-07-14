@@ -1,4 +1,4 @@
-# generate_model
+# generate_model files
 # coding=utf-8
 
 import sys
@@ -20,6 +20,9 @@ import numbers
 import pptx_template.pyel as pyel
 
 log = logging.getLogger()
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+log.addHandler(handler)
 
 def build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False):
     """
@@ -57,12 +60,12 @@ def write_tsv(file_name, list_of_list):
      for row in list_of_list:
          for col, value in enumerate(row):
             if col != 0:
-                tsv.write("\t")
+                tsv.write(u"\t")
             if value != None:
-                tsv.write(str(value))
+                tsv.write(u"%s" % value)
             else:
                 tsv.write('')
-         tsv.write("\n")
+         tsv.write(u"\n")
      tsv.close()
 
 FRACTIONAL_PART_RE = re.compile(u"\.(0+)")
@@ -128,16 +131,6 @@ def generate_whole_model(xls, model_rows, slides):
 
 
 def main():
-  if sys.version_info[0] == 2:
-    # sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
-
-  log = logging.getLogger()
-  handler = logging.StreamHandler()
-  handler.setLevel(logging.DEBUG)
-  log.addHandler(handler)
-
   parser = argparse.ArgumentParser(description = 'Generate model.json from Excel')
   parser.add_argument('--xlsx',      help='file name of Excel book', required=True)
   parser.add_argument('--debug',      action='store_true', help='output verbose log')
@@ -159,5 +152,15 @@ def main():
   model_file.close()
 
 
+log = logging.getLogger()
+
 if __name__ == '__main__':
+  if sys.version_info[0] == 2:
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
+  handler = logging.StreamHandler()
+  handler.setLevel(logging.DEBUG)
+  log.addHandler(handler)
+
   main()

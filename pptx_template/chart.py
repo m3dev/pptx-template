@@ -12,6 +12,8 @@ from pptx.enum.chart import XL_CHART_TYPE as ct
 import pandas as pd
 import numpy as np
 
+from six import string_types
+
 import pptx_template.pyel as pyel
 import pptx_template.text as txt
 import pptx_template.pptx_util as util
@@ -22,9 +24,14 @@ def _nan_to_none(x):
   # log.debug(u" type of x:%s is:%s" % (x, type(x)))
   if isinstance(x, np.generic):
       y = None if np.isnan(x) else x.item()
+  elif isinstance(x, string_types):
+      y = x if isinstance(x, type(u"a")) else unicode(x,'utf-8')
   else:
       y = x
   return y
+
+def to_unicode(s):
+    return s if isinstance(s, type(u"a")) else unicode(s,'utf-8')
 
 def _build_xy_chart_data(csv):
   chart_data = XyChartData()
@@ -40,15 +47,16 @@ def _build_xy_chart_data(csv):
 def _build_chart_data(csv):
   chart_data = ChartData()
   categories = [_nan_to_none(x) for x in csv.iloc[:,0].values]
-  categories = [str(x) if x else u"c%d" % i for i,x in enumerate(categories)]
+  categories = [u"%s" % x if x else u"c%d" % i for i,x in enumerate(categories)]
   log.debug(u" Setting categories with values:%s" % categories)
   chart_data.categories = categories
 
   for i in range(1, csv.columns.size):
     col = csv.iloc[:, i]
     values = [_nan_to_none(x) for x in col.values]
-    log.debug(u" Adding series:%s values:%s" % (col.name, values))
-    chart_data.add_series(col.name, values)
+    name = to_unicode(col.name)
+    log.debug(u" Adding series:%s values:%s" % (name, values))
+    chart_data.add_series(name, values)
   return chart_data
 
 def _is_xy_chart(chart):
@@ -75,7 +83,7 @@ def _load_csv_into_dataframe(chart_id, chart_setting):
         if os.path.isfile(csv_file_name):
           break
       else:
-        raise ValueError("File not found: csv or tsv for %s" % chart_id)
+        raise ValueError(u"File not found: csv or tsv for %s" % chart_id)
 
     log.info(u"Loading from csv file: %s" % csv_file_name)
     delimiter = '\t' if csv_file_name.endswith('.tsv') else ','
