@@ -60,9 +60,7 @@ def main():
       temp_dir = tempfile.mkdtemp()
       try:
           log.info(u"Working in temporary dir:%s ..." % temp_dir)
-          xls = xl.load_workbook(opts.model, read_only=True, data_only=True)
-          model_sheet = xls['model']
-          slides = generate_whole_model(xls, islice(model_sheet.rows, 1, None), {})
+          slides = generate_whole_model(opts.model, {})
           process_all_slides(slides, ppt)
       finally:
           os.chdir(current_dir)

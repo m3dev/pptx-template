@@ -57,22 +57,25 @@ class MyTest(unittest.TestCase):
           return result
 
       xls_file = os.path.join(os.path.dirname(__file__), 'data2', 'in.xlsx')
-      xls = xl.load_workbook(xls_file, read_only=True, data_only=True)
-      model_sheet = xls['model']
-
       temp_dir = tempfile.mkdtemp()
       current_dir = os.getcwd()
       try:
           os.chdir(temp_dir)
 
-          slides = generate_whole_model(xls, islice(model_sheet.rows, 1, None), {})
+          slides = generate_whole_model(xls_file, {})
 
           self.assertEqual({u'file_name': 'p02-normal.tsv'}, slides['p02']['normal'])
           self.assertEqual({u'file_name': 'p02-sidebyside.tsv'}, slides['p02']['sidebyside'])
           self.assertEqual({u'file_name': 'p02-transpose.tsv'}, slides['p02']['transpose'])
           self.assertEqual(u'Hello!', slides['p01']['greeting']['en'])
           self.assertEqual(u'こんにちは！', slides['p01']['greeting']['ja'])
-          self.assertEqual([['Season', u'売り上げ', u'利益', u'利益率'],[u'春', 100, 50, 0.5],[u'夏', 110, 60, 0.5],[u'秋', 120, 70, 0.5]], slides['p02']['array'])
+          self.assertEqual([
+                ['Season', u'売り上げ', u'利益', u'利益率'],
+                [u'春', 100, 50, 0.5],
+                [u'夏', 110, 60, 0.5],
+                [u'秋', 120, 70, 0.5],
+                [u'冬', 130,  0, 0.6],
+          ], slides['p02']['array'])
 
           self.assertEqual(read_expect('p02-normal.tsv'), read_result('p02-normal.tsv'))
           self.assertEqual(read_expect('p02-transpose.tsv'), read_result('p02-transpose.tsv'))

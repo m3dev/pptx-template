@@ -97,15 +97,23 @@ def format_cell_value(cell):
     else:
         return value
 
-def extract_row(slides, xls, slide_id, el, cell, range_name, options):
-  log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, cell.value, range_name, options))
+def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
+  log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value_cell.value, range_name, options))
 
   model_value = None
-  if cell.value:
-      model_value = format_cell_value(cell)
+  if value_cell.value:
+      model_value = format_cell_value(value_cell)
   elif range_name:
+      if range_name[0] == '=':
+          rects = []
+          for one_range in range_name[1:].split(','):
+              parts = one_range.split('!')        # sheet!A1:C99 style
+              sheet, coords = parts[0], parts[1]
+              rects.append(xls[sheet][coords])
+      else:
+          rects = [xls[sheet][coords] for sheet, coords in xls.defined_names[range_name].destinations]
+
       file_name = u"%s-%s.tsv" % (slide_id, el)
-      rects = [xls[sheet][cords] for sheet, cords in xls.defined_names[range_name].destinations]
       array_mode = u"Array" in options
       tsv = build_tsv(rects, side_by_side = u"SideBySide" in options, transpose = u"Transpose" in options, format_cell = array_mode)
 
@@ -120,15 +128,28 @@ def extract_row(slides, xls, slide_id, el, cell, range_name, options):
   return pyel.set_value(slides, u"%s.%s" % (slide_id, el), model_value)
 
 
-def generate_whole_model(xls, model_rows, slides):
-  for row in model_rows:
-      slide_id, el, cell, range_name, options = row[0].value, row[1].value, row[2], row[3].value, row[4].value
+def generate_whole_model(xls, slides):
+  (xls, rows) = build_model_sheet_rows(xls)
+  for data, formula in islice(rows, 1, None):
+      slide_id, el, cell, range_name, options = data[0].value, data[1].value, data[2], formula[3].value, data[4].value
       if not slide_id or slide_id[0] == '#':
           continue
       options = options.split(' ,') if options else []
       slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
   return slides
 
+def build_model_sheet_rows(xls_filename):
+    """
+    Builds row iterator for values from data_only mode and not data_only mode.
+    Why we need this function is - To read cell value and its formula at the same time,
+    Openpyxl needs to create two instances in different mode.
+    """
+    xls = xl.load_workbook(xls_filename, read_only=True, data_only=True)
+    xls_formula = xl.load_workbook(xls_filename, read_only=True, data_only=False)
+    model_sheet_data = xls['model']
+    model_sheet_formula = xls_formula['model']
+    rows = zip(model_sheet_data.rows, model_sheet_formula.rows)
+    return (xls, rows)
 
 def main():
   parser = argparse.ArgumentParser(description = 'Generate model.json from Excel')
@@ -141,10 +162,7 @@ def main():
   else:
     log.setLevel(logging.INFO)
 
-  xls = xl.load_workbook(opts.xlsx, read_only=True, data_only=True)
-  model_sheet = xls['model']
-
-  slides = build_whole_model(xls, islice(model_sheet.rows, 1, None), {})
+  slides = build_whole_model(opts.xlsx, {})
 
   log.info(u"writing model data:%s" % {"slides": slides})
   model_file = open('model.json', mode='w', encoding='utf-8')
