@@ -7,21 +7,26 @@ import logging
 
 from pptx_template.cli import main
 
+BASE_DIR = os.getcwd()
+
+log = logging.getLogger()
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+log.addHandler(handler)
+
 class MyTest(unittest.TestCase):
+    def tearDown(self):
+        os.chdir(BASE_DIR)
 
     def test_simple(self):
-        current_dir = os.getcwd()
-        os.chdir(os.path.join(os.path.dirname(__file__), 'data'))
+        os.chdir(os.path.join(BASE_DIR, 'test', 'data'))
         sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'model.json', '--debug']
         main()
-        os.chdir(current_dir)
 
     def test_xlsx_mode(self):
-        current_dir = os.getcwd()
-        os.chdir(os.path.join(os.path.dirname(__file__), 'data2'))
+        os.chdir(os.path.join(BASE_DIR, 'test', 'data2'))
         sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'in.xlsx', '--debug']
         main()
-        os.chdir(current_dir)
 
 if __name__ == '__main__':
     unittest.main()

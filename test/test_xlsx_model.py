@@ -3,14 +3,11 @@
 import unittest
 import sys
 import os
-import tempfile
-import shutil
 from io import open
 
-from itertools import islice
+import openpyxl as xl
 
 from pptx_template.xlsx_model import build_tsv, format_cell_value, generate_whole_model
-import openpyxl as xl
 
 class Cell:
     def __init__(self, value, number_format):

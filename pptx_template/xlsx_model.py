@@ -20,9 +20,6 @@ import numbers
 import pptx_template.pyel as pyel
 
 log = logging.getLogger()
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-log.addHandler(handler)
 
 def build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False):
     """
@@ -95,7 +92,7 @@ def format_cell_value(cell):
         return value
 
 def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
-    log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value_cell.value, range_name, options))
+    log.debug(" loading from xlsx: slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value_cell.value, range_name, options))
 
     model_value = None
     if value_cell.value:
@@ -110,7 +107,6 @@ def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
         else:
             rects = [xls[sheet][coords] for sheet, coords in xls.defined_names[range_name].destinations]
 
-        file_name = u"%s-%s.tsv" % (slide_id, el)
         array_mode = u"Array" in options
         tsv = build_tsv(rects, side_by_side = u"SideBySide" in options, transpose = u"Transpose" in options, format_cell = array_mode)
 
@@ -135,6 +131,7 @@ def generate_whole_model(xls, slides):
             continue
         options = options.split(' ,') if options else []
         slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
+    xls.close()
     xls_formula.close()
     return slides
 
@@ -150,35 +147,3 @@ def build_model_sheet_rows(xls_filename):
     model_sheet_formula = xls_formula['model']
     rows = zip(model_sheet_data.rows, model_sheet_formula.rows)
     return (xls, xls_formula, rows)
-
-def main():
-    parser = argparse.ArgumentParser(description = 'Generate model.json from Excel')
-    parser.add_argument('--xlsx',            help='file name of Excel book', required=True)
-    parser.add_argument('--debug',            action='store_true', help='output verbose log')
-    opts = parser.parse_args()
-
-    if opts.debug:
-        log.setLevel(logging.DEBUG)
-    else:
-        log.setLevel(logging.INFO)
-
-    slides = build_whole_model(opts.xlsx, {})
-
-    log.info(u"writing model data:%s" % {"slides": slides})
-    model_file = open('model.json', mode='w', encoding='utf-8')
-    json.dump({"slides":slides}, model_file)
-    model_file.close()
-
-
-log = logging.getLogger()
-
-if __name__ == '__main__':
-    if sys.version_info[0] == 2:
-        reload(sys)
-        sys.setdefaultencoding('utf-8')
-
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.DEBUG)
-    log.addHandler(handler)
-
-    main()
