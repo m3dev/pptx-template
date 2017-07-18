@@ -9,7 +9,7 @@ from io import open
 
 from itertools import islice
 
-from pptx_template.xlsxMode import build_tsv, format_cell_value, generate_whole_model
+from pptx_template.xlsx_model import build_tsv, format_cell_value, generate_whole_model
 import openpyxl as xl
 
 class Cell:
