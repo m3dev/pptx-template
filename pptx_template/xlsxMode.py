@@ -8,7 +8,7 @@ import argparse
 import json
 
 import re
-from io import open
+from io import open, StringIO
 
 import openpyxl as xl
 from six import iteritems, moves
@@ -54,9 +54,7 @@ def build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False)
 
     return result
 
-def write_tsv(file_name, list_of_list):
-     log.info("writing tsv %s..." % file_name)
-     tsv = open(file_name, encoding='utf-8', mode='w')
+def write_tsv(tsv, list_of_list):
      for row in list_of_list:
          for col, value in enumerate(row):
             if col != 0:
@@ -66,7 +64,6 @@ def write_tsv(file_name, list_of_list):
             else:
                 tsv.write('')
          tsv.write(u"\n")
-     tsv.close()
 
 FRACTIONAL_PART_RE = re.compile(u"\.(0+)")
 
@@ -120,8 +117,10 @@ def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
       if array_mode:
           model_value = tsv
       else:
-          write_tsv(file_name, tsv)
-          model_value = {"file_name": file_name}
+          tsv_body = StringIO()
+          write_tsv(tsv_body, tsv)
+          model_value = {"tsv_body": tsv_body.getvalue()}
+          tsv_body.close()
   else:
        raise ValueError("One of value or range_name required.")
 
@@ -129,13 +128,14 @@ def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
 
 
 def generate_whole_model(xls, slides):
-  (xls, rows) = build_model_sheet_rows(xls)
+  (xls, xls_formula, rows) = build_model_sheet_rows(xls)
   for data, formula in islice(rows, 1, None):
       slide_id, el, cell, range_name, options = data[0].value, data[1].value, data[2], formula[3].value, data[4].value
       if not slide_id or slide_id[0] == '#':
           continue
       options = options.split(' ,') if options else []
       slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
+  xls_formula.close()
   return slides
 
 def build_model_sheet_rows(xls_filename):
@@ -149,7 +149,7 @@ def build_model_sheet_rows(xls_filename):
     model_sheet_data = xls['model']
     model_sheet_formula = xls_formula['model']
     rows = zip(model_sheet_data.rows, model_sheet_formula.rows)
-    return (xls, rows)
+    return (xls, xls_formula, rows)
 
 def main():
   parser = argparse.ArgumentParser(description = 'Generate model.json from Excel')

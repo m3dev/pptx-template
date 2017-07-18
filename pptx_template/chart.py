@@ -70,11 +70,14 @@ def _set_value_axis(chart, chart_id, chart_setting):
     util.set_value_axis(chart, max = max, min = min)
 
 def _load_csv_into_dataframe(chart_id, chart_setting):
-  csv_body = chart_setting.get('body')
-  if csv_body:
-    csv_body_file = StringIO(csv_body)
-    log.info(u"Loading from csv string: %s" % csv_body)
-    return pd.read_csv(csv_body_file)
+  if 'body' in chart_setting:
+    csv_body = chart_setting.get('body')
+    log.info(u"Loading from CSV string: %s" % csv_body)
+    return pd.read_csv(StringIO(csv_body))
+  elif 'tsv_body' in chart_setting:
+    tsv_body = chart_setting.get('tsv_body')
+    log.info(u"Loading from TSV string: %s" % tsv_body)
+    return pd.read_csv(StringIO(tsv_body), delimiter='\t')
   else:
     csv_file_name = chart_setting.get('file_name')
     if not csv_file_name:

@@ -56,15 +56,8 @@ def main():
   ppt = Presentation(opts.template)
 
   if opts.model.endswith(u'.xlsx'):
-      current_dir = os.getcwd()
-      temp_dir = tempfile.mkdtemp()
-      try:
-          log.info(u"Working in temporary dir:%s ..." % temp_dir)
-          slides = generate_whole_model(opts.model, {})
-          process_all_slides(slides, ppt)
-      finally:
-          os.chdir(current_dir)
-          shutil.rmtree(temp_dir)
+      slides = generate_whole_model(opts.model, {})
+      process_all_slides(slides, ppt)
   else:
       with open(opts.model, 'r', encoding='utf-8') as f:
           models = json.load(f)

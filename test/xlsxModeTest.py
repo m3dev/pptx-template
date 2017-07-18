@@ -50,40 +50,22 @@ class MyTest(unittest.TestCase):
           f.close()
           return result
 
-      def read_result(name):
-          f = open(os.path.join(temp_dir, name), mode = 'r', encoding = 'utf-8')
-          result = f.read()
-          f.close()
-          return result
-
       xls_file = os.path.join(os.path.dirname(__file__), 'data2', 'in.xlsx')
-      temp_dir = tempfile.mkdtemp()
-      current_dir = os.getcwd()
-      try:
-          os.chdir(temp_dir)
+      slides = generate_whole_model(xls_file, {})
 
-          slides = generate_whole_model(xls_file, {})
+      self.assertEqual(u'Hello!', slides['p01']['greeting']['en'])
+      self.assertEqual(u'こんにちは！', slides['p01']['greeting']['ja'])
+      self.assertEqual([
+            ['Season', u'売り上げ', u'利益', u'利益率'],
+            [u'春', 100, 50, 0.5],
+            [u'夏', 110, 60, 0.5],
+            [u'秋', 120, 70, 0.5],
+            [u'冬', 130,  0, 0.6],
+      ], slides['p02']['array'])
 
-          self.assertEqual({u'file_name': 'p02-normal.tsv'}, slides['p02']['normal'])
-          self.assertEqual({u'file_name': 'p02-sidebyside.tsv'}, slides['p02']['sidebyside'])
-          self.assertEqual({u'file_name': 'p02-transpose.tsv'}, slides['p02']['transpose'])
-          self.assertEqual(u'Hello!', slides['p01']['greeting']['en'])
-          self.assertEqual(u'こんにちは！', slides['p01']['greeting']['ja'])
-          self.assertEqual([
-                ['Season', u'売り上げ', u'利益', u'利益率'],
-                [u'春', 100, 50, 0.5],
-                [u'夏', 110, 60, 0.5],
-                [u'秋', 120, 70, 0.5],
-                [u'冬', 130,  0, 0.6],
-          ], slides['p02']['array'])
-
-          self.assertEqual(read_expect('p02-normal.tsv'), read_result('p02-normal.tsv'))
-          self.assertEqual(read_expect('p02-transpose.tsv'), read_result('p02-transpose.tsv'))
-          self.assertEqual(read_expect('p02-sidebyside.tsv'), read_result('p02-sidebyside.tsv'))
-
-      finally:
-          os.chdir(current_dir)
-          shutil.rmtree(temp_dir)
+      self.assertEqual(read_expect('p02-normal.tsv'), slides['p02']['normal']['tsv_body'])
+      self.assertEqual(read_expect('p02-transpose.tsv'), slides['p02']['transpose']['tsv_body'])
+      self.assertEqual(read_expect('p02-sidebyside.tsv'), slides['p02']['sidebyside']['tsv_body'])
 
 if __name__ == '__main__':
     unittest.main()
