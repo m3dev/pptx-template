@@ -20,62 +20,62 @@ from pptx_template.core import edit_slide, remove_slide, get_slide, remove_slide
 from pptx_template.xlsx_model import generate_whole_model
 
 def process_one_slide(ppt, slide, model):
-  if model == u"remove":
-    remove_slide(ppt, slide)
-  else:
-    edit_slide(slide, model)
+    if model == u"remove":
+        remove_slide(ppt, slide)
+    else:
+        edit_slide(slide, model)
 
 
 def process_all_slides(slides, ppt):
-  if isinstance(slides, dict):
-    for (slide_id, model) in iteritems(slides):
-      slide = get_slide(ppt, slide_id)
-      remove_slide_id(ppt, slide_id)
-      log.info("Processing slide_id: %s" % slide_id)
-      process_one_slide(ppt, slide, model)
-    remove_all_slides_having_id(ppt)
-  elif isinstance(slides, list):
-    for (model, slide) in zip(slides, ppt.slides):
-      process_one_slide(ppt, slide, model)
+    if isinstance(slides, dict):
+        for (slide_id, model) in iteritems(slides):
+            slide = get_slide(ppt, slide_id)
+            remove_slide_id(ppt, slide_id)
+            log.info("Processing slide_id: %s" % slide_id)
+            process_one_slide(ppt, slide, model)
+        remove_all_slides_having_id(ppt)
+    elif isinstance(slides, list):
+        for (model, slide) in zip(slides, ppt.slides):
+            process_one_slide(ppt, slide, model)
 
 
 def main():
-  parser = argparse.ArgumentParser(description = 'Edit pptx with text replace and csv import')
-  parser.add_argument('--template',   help='template pptx file (required)', required=True)
-  parser.add_argument('--model',      help='model object file with .json or .xlsx format', required=True)
-  parser.add_argument('--out',        help='template pptx file (required)', required=True)
-  parser.add_argument('--debug',      action='store_true', help='output verbose log')
-  opts = parser.parse_args()
+    parser = argparse.ArgumentParser(description = 'Edit pptx with text replace and csv import')
+    parser.add_argument('--template',  help='template pptx file (required)', required=True)
+    parser.add_argument('--model',     help='model object file with .json or .xlsx format', required=True)
+    parser.add_argument('--out',       help='template pptx file (required)', required=True)
+    parser.add_argument('--debug',     action='store_true', help='output verbose log')
+    opts = parser.parse_args()
 
-  if opts.debug:
-    log.setLevel(logging.DEBUG)
-  else:
-    log.setLevel(logging.INFO)
+    if opts.debug:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.INFO)
 
-  log.info(u"Loading template pptx: %s" % opts.template)
-  ppt = Presentation(opts.template)
+    log.info(u"Loading template pptx: %s" % opts.template)
+    ppt = Presentation(opts.template)
 
-  if opts.model.endswith(u'.xlsx'):
-      slides = generate_whole_model(opts.model, {})
-      process_all_slides(slides, ppt)
-  else:
-      with open(opts.model, 'r', encoding='utf-8') as f:
-          models = json.load(f)
-      slides = models[u'slides']
-      process_all_slides(slides, ppt)
+    if opts.model.endswith(u'.xlsx'):
+        slides = generate_whole_model(opts.model, {})
+        process_all_slides(slides, ppt)
+    else:
+        with open(opts.model, 'r', encoding='utf-8') as f:
+            models = json.load(f)
+        slides = models[u'slides']
+        process_all_slides(slides, ppt)
 
-  log.info(u"Writing pptx: %s" % opts.out)
-  ppt.save(opts.out)
+    log.info(u"Writing pptx: %s" % opts.out)
+    ppt.save(opts.out)
 
 
 log = logging.getLogger()
 
 if __name__ == '__main__':
-  if sys.version_info[0] == 2:
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
+    if sys.version_info[0] == 2:
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
 
-  handler = logging.StreamHandler()
-  handler.setLevel(logging.DEBUG)
-  log.addHandler(handler)
-  main()
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    log.addHandler(handler)
+    main()

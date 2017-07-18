@@ -95,48 +95,48 @@ def format_cell_value(cell):
         return value
 
 def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
-  log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value_cell.value, range_name, options))
+    log.debug("slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value_cell.value, range_name, options))
 
-  model_value = None
-  if value_cell.value:
-      model_value = format_cell_value(value_cell)
-  elif range_name:
-      if range_name[0] == '=':
-          rects = []
-          for one_range in range_name[1:].split(','):
-              parts = one_range.split('!')        # sheet!A1:C99 style
-              sheet, coords = parts[0], parts[1]
-              rects.append(xls[sheet][coords])
-      else:
-          rects = [xls[sheet][coords] for sheet, coords in xls.defined_names[range_name].destinations]
+    model_value = None
+    if value_cell.value:
+        model_value = format_cell_value(value_cell)
+    elif range_name:
+        if range_name[0] == '=':
+            rects = []
+            for one_range in range_name[1:].split(','):
+                parts = one_range.split('!')                # sheet!A1:C99 style
+                sheet, coords = parts[0], parts[1]
+                rects.append(xls[sheet][coords])
+        else:
+            rects = [xls[sheet][coords] for sheet, coords in xls.defined_names[range_name].destinations]
 
-      file_name = u"%s-%s.tsv" % (slide_id, el)
-      array_mode = u"Array" in options
-      tsv = build_tsv(rects, side_by_side = u"SideBySide" in options, transpose = u"Transpose" in options, format_cell = array_mode)
+        file_name = u"%s-%s.tsv" % (slide_id, el)
+        array_mode = u"Array" in options
+        tsv = build_tsv(rects, side_by_side = u"SideBySide" in options, transpose = u"Transpose" in options, format_cell = array_mode)
 
-      if array_mode:
-          model_value = tsv
-      else:
-          tsv_body = StringIO()
-          write_tsv(tsv_body, tsv)
-          model_value = {"tsv_body": tsv_body.getvalue()}
-          tsv_body.close()
-  else:
-       raise ValueError("One of value or range_name required.")
+        if array_mode:
+            model_value = tsv
+        else:
+            tsv_body = StringIO()
+            write_tsv(tsv_body, tsv)
+            model_value = {"tsv_body": tsv_body.getvalue()}
+            tsv_body.close()
+    else:
+         raise ValueError("One of value or range_name required.")
 
-  return pyel.set_value(slides, u"%s.%s" % (slide_id, el), model_value)
+    return pyel.set_value(slides, u"%s.%s" % (slide_id, el), model_value)
 
 
 def generate_whole_model(xls, slides):
-  (xls, xls_formula, rows) = build_model_sheet_rows(xls)
-  for data, formula in islice(rows, 1, None):
-      slide_id, el, cell, range_name, options = data[0].value, data[1].value, data[2], formula[3].value, data[4].value
-      if not slide_id or slide_id[0] == '#':
-          continue
-      options = options.split(' ,') if options else []
-      slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
-  xls_formula.close()
-  return slides
+    (xls, xls_formula, rows) = build_model_sheet_rows(xls)
+    for data, formula in islice(rows, 1, None):
+        slide_id, el, cell, range_name, options = data[0].value, data[1].value, data[2], formula[3].value, data[4].value
+        if not slide_id or slide_id[0] == '#':
+            continue
+        options = options.split(' ,') if options else []
+        slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
+    xls_formula.close()
+    return slides
 
 def build_model_sheet_rows(xls_filename):
     """
@@ -152,33 +152,33 @@ def build_model_sheet_rows(xls_filename):
     return (xls, xls_formula, rows)
 
 def main():
-  parser = argparse.ArgumentParser(description = 'Generate model.json from Excel')
-  parser.add_argument('--xlsx',      help='file name of Excel book', required=True)
-  parser.add_argument('--debug',      action='store_true', help='output verbose log')
-  opts = parser.parse_args()
+    parser = argparse.ArgumentParser(description = 'Generate model.json from Excel')
+    parser.add_argument('--xlsx',            help='file name of Excel book', required=True)
+    parser.add_argument('--debug',            action='store_true', help='output verbose log')
+    opts = parser.parse_args()
 
-  if opts.debug:
-    log.setLevel(logging.DEBUG)
-  else:
-    log.setLevel(logging.INFO)
+    if opts.debug:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.INFO)
 
-  slides = build_whole_model(opts.xlsx, {})
+    slides = build_whole_model(opts.xlsx, {})
 
-  log.info(u"writing model data:%s" % {"slides": slides})
-  model_file = open('model.json', mode='w', encoding='utf-8')
-  json.dump({"slides":slides}, model_file)
-  model_file.close()
+    log.info(u"writing model data:%s" % {"slides": slides})
+    model_file = open('model.json', mode='w', encoding='utf-8')
+    json.dump({"slides":slides}, model_file)
+    model_file.close()
 
 
 log = logging.getLogger()
 
 if __name__ == '__main__':
-  if sys.version_info[0] == 2:
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
+    if sys.version_info[0] == 2:
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
 
-  handler = logging.StreamHandler()
-  handler.setLevel(logging.DEBUG)
-  log.addHandler(handler)
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    log.addHandler(handler)
 
-  main()
+    main()
