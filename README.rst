@@ -12,3 +12,11 @@ This helps your routine reporting work that have many manual copy-paste from exc
   - for now, only UTF-8 encoding is supported for json, csv
 
 For further information, please visit GitHub: https://github.com/m3dev/pptx-template
+
+changelogs
+==========
+
+2017.07.18
+
+  - Added "xlsx-mode"
+  - Fixed many small bugs
