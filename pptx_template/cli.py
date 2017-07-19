@@ -18,6 +18,7 @@ from itertools import islice
 
 from pptx_template.core import edit_slide, remove_slide, get_slide, remove_slide_id, remove_all_slides_having_id
 from pptx_template.xlsx_model import generate_whole_model
+from pptx_template import __version__
 
 def process_one_slide(ppt, slide, model):
     if model == u"remove":
@@ -47,22 +48,27 @@ def main():
     parser.add_argument('--debug',     action='store_true', help='output verbose log')
     opts = parser.parse_args()
 
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    log.addHandler(handler)
+
     if opts.debug:
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.INFO)
 
-    log.info(u"Loading template pptx: %s" % opts.template)
-    ppt = Presentation(opts.template)
+    log.info(u"pptx-template version %s" % __version__)
 
     if opts.model.endswith(u'.xlsx'):
         slides = generate_whole_model(opts.model, {})
-        process_all_slides(slides, ppt)
     else:
         with open(opts.model, 'r', encoding='utf-8') as f:
             models = json.load(f)
         slides = models[u'slides']
-        process_all_slides(slides, ppt)
+
+    log.info(u"Loading template pptx: %s" % opts.template)
+    ppt = Presentation(opts.template)
+    process_all_slides(slides, ppt)
 
     log.info(u"Writing pptx: %s" % opts.out)
     ppt.save(opts.out)
@@ -75,7 +81,4 @@ if __name__ == '__main__':
         reload(sys)
         sys.setdefaultencoding('utf-8')
 
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.DEBUG)
-    log.addHandler(handler)
     main()

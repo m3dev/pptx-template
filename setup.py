@@ -1,11 +1,15 @@
 from setuptools import setup
 import io
+import re
+
+with io.open("pptx_template/__init__.py") as ver:
+    metadata = dict(re.findall("__([a-z]+)__\s*=\s*'([^']+)'", ver.read()))
 
 with io.open('README.rst', encoding='ascii') as fp:
     long_description = fp.read()
 
 setup(name='pptx-template',
-      version='0.2.0',
+      version=metadata['version'],
       description='The PowerPoint presentation builder using template.pptx and data(json and csv)',
       long_description=long_description,
       url='http://github.com/m3dev/pptx-template',
