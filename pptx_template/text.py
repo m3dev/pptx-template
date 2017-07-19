@@ -92,10 +92,8 @@ def replace_all_els_in_text_frame(text_frame, model):
     for el in _iterate_els(text_frame.text):
         value = pyel.eval_el(el, model)
         if not value:
-            log.error(u"Cannot find model value for {%s}" % el)
-            continue
-
-        if isinstance(value, numbers.Number):
+            replacing_text = ''
+        elif isinstance(value, numbers.Number):
             replacing_text = str(value)
         elif not isinstance(value, string_types):
             log.error(u"Invalid value for {%s}, model: %s" % (el, value))
