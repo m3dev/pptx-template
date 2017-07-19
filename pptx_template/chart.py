@@ -39,9 +39,9 @@ def _build_xy_chart_data(csv):
         series = chart_data.add_series(csv.columns[i])
         xy_col = csv.iloc[:, [0, i]]
         for (_, row) in xy_col.iterrows():
-            x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
-            log.debug(u" Adding xy %s,%s" % (y, x))
-            series.add_data_point(y, x)
+            y, x = _nan_to_none(row[0]), _nan_to_none(row[1])
+            log.debug(u" Adding xy %s,%s" % (x, y))
+            series.add_data_point(x, y)
     return chart_data
 
 def _build_chart_data(csv):
@@ -72,11 +72,9 @@ def _set_value_axis(chart, chart_id, chart_setting):
 def _load_csv_into_dataframe(chart_id, chart_setting):
     if 'body' in chart_setting:
         csv_body = chart_setting.get('body')
-        log.debug(u" Loading from CSV string: %s" % csv_body)
         return pd.read_csv(StringIO(csv_body))
     elif 'tsv_body' in chart_setting:
         tsv_body = chart_setting.get('tsv_body')
-        log.debug(u" Loading from TSV string: %s" % tsv_body)
         return pd.read_csv(StringIO(tsv_body), delimiter='\t')
     else:
         csv_file_name = chart_setting.get('file_name')
@@ -92,12 +90,20 @@ def _load_csv_into_dataframe(chart_id, chart_setting):
         delimiter = '\t' if csv_file_name.endswith('.tsv') else ','
         return pd.read_csv(csv_file_name, delimiter=delimiter)
 
+def _check_data_size(chart_id, chart, csv):
+    num_csv_series = len(csv.columns) - 1
+    num_chart_series = len(chart.series)
+    log.debug(" num of csv series: %s, chart series: %s" % (num_csv_series, num_chart_series))
+    if num_csv_series < num_chart_series:
+        raise ValueError("ERROR: chart_id [%s] requires %s series, but CSV contains %s. data:\n%s" % (chart_id, num_chart_series, num_csv_series, csv))
 
 def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
     """
         1つのチャートに対して指定されたCSVからデータを読み込む。
     """
     csv = _load_csv_into_dataframe(chart_id, chart_setting)
+
+    _check_data_size(chart_id, chart, csv)
 
     if _is_xy_chart(chart):
         log.info(u"Setting csv/tsv into XY chart_id: %s" % chart_id)
