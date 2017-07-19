@@ -51,7 +51,7 @@ Excel file should have a sheet named "model"
 
 The "model" sheet should have one header line and value lines. The header line will be ignored.
 
-Each line should have this items:
+Each line should have these items:
 
   - SlideId : ID for slide which contains ``{id:<slide_id>}`` text frame somewhere in the slide
   - Key     : Key for substitution, written as ``{<key>}`` in slides
@@ -59,19 +59,21 @@ Each line should have this items:
   - Range   : Range for chart/table data. If Value exists, Range will be ignored.
   - Options : Export options to create range value. 
 
-``
+```
 ex)
 SlideId    Key          Value    Range            Options
 ----------------------------------------------------------
 p1         greeting.en  Hello    (empty)
 p1         greeting.es  Hola     (empty)
 p1         chart        (empty)  chart1-range
-p1         chart2       (empty)  =sheet2!A3:C10   Transpose
-``
+p1         chart2       (empty)  =sheet2!A3:C10   Transpose,Array
+```
+
 #### Supported Excel formats for Value
 
-  - Digits of fraction ``0.000``, only ``.`` can be used. (not ``,``)
-  - Percent ``0.0%`` : value will be multiplied by 100 and followd by ``%''
+  - Digits of fraction : ex) ``0.000`` 
+    - only ``.`` can be used. (not ``,``)
+  - Percent : value will be multiplied by 100 and followd by ``%``. ex) ``0.0%`` 
   - Not support date formats like ``yyyy-mm-dd``
   - Not support ``,`` for 3-digit delimiter
   
@@ -79,11 +81,11 @@ p1         chart2       (empty)  =sheet2!A3:C10   Transpose
 
 There're two ways to specify data location:
 
-  - Name of Excel's named range : ex. ``range1``
-  - Range reference : ex. ``=A1:C99``
+  - Name of Excel's named range : ex) ``range1``
+  - Range reference : ex) ``=A1:C99``
     - This will be shown '#VALUE!' in excel. Excel's ``FORMULATEXT()`` might help to check if the value is correct
-    - More than 2 ranges can be written, followed by ``,``: ex. ``=A1:A10,C1:C10``
-    - Only relative form is supported. Not supported ``=A$1:A$99` nor ``=<named_range>``
+    - More than 2 ranges can be written, followed by ``,``: ex) ``=A1:A10,C1:C10``
+    - Only relative form is supported. Not supported ``=A$1:A$99`` nor ``=<named_range>``
     
 #### Options
 
