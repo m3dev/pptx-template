@@ -48,9 +48,10 @@ def main():
     parser.add_argument('--debug',     action='store_true', help='output verbose log')
     opts = parser.parse_args()
 
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.DEBUG)
-    log.addHandler(handler)
+    if not len(log.handlers):
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
+        log.addHandler(handler)
 
     if opts.debug:
         log.setLevel(logging.DEBUG)
