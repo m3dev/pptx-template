@@ -11,7 +11,7 @@ import os
 import tempfile
 
 import openpyxl as xl
-from io import open
+from io import open, TextIOWrapper
 from pptx import Presentation
 from six import iteritems
 from itertools import islice
@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser(description = 'Edit pptx with text replace and csv import')
     parser.add_argument('--template',  help='template pptx file (required)', required=True)
     parser.add_argument('--model',     help='model object file with .json or .xlsx format', required=True)
-    parser.add_argument('--out',       help='template pptx file (required)', required=True)
+    parser.add_argument('--out',       help='created pptx file (required)', required=True)
     parser.add_argument('--debug',     action='store_true', help='output verbose log')
     opts = parser.parse_args()
 
@@ -63,8 +63,10 @@ def main():
     if opts.model.endswith(u'.xlsx'):
         slides = generate_whole_model(opts.model, {})
     else:
-        with open(opts.model, 'r', encoding='utf-8') as f:
-            models = json.load(f)
+        if sys.version_info[0] == 3:
+            sys.stdin = TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+        with open(opts.model, 'r', encoding='utf-8') if opts.model != u'-' else sys.stdin as m:
+            models = json.load(m)
         slides = models[u'slides']
 
     log.info(u"Loading template pptx: %s" % opts.template)
