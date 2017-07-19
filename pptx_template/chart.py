@@ -72,11 +72,11 @@ def _set_value_axis(chart, chart_id, chart_setting):
 def _load_csv_into_dataframe(chart_id, chart_setting):
     if 'body' in chart_setting:
         csv_body = chart_setting.get('body')
-        log.info(u"Loading from CSV string: %s" % csv_body)
+        log.debug(u" Loading from CSV string: %s" % csv_body)
         return pd.read_csv(StringIO(csv_body))
     elif 'tsv_body' in chart_setting:
         tsv_body = chart_setting.get('tsv_body')
-        log.info(u"Loading from TSV string: %s" % tsv_body)
+        log.debug(u" Loading from TSV string: %s" % tsv_body)
         return pd.read_csv(StringIO(tsv_body), delimiter='\t')
     else:
         csv_file_name = chart_setting.get('file_name')
@@ -88,7 +88,7 @@ def _load_csv_into_dataframe(chart_id, chart_setting):
             else:
                 raise ValueError(u"File not found: csv or tsv for %s" % chart_id)
 
-        log.info(u"Loading from csv file: %s" % csv_file_name)
+        log.debug(u" Loading from csv file: %s" % csv_file_name)
         delimiter = '\t' if csv_file_name.endswith('.tsv') else ','
         return pd.read_csv(csv_file_name, delimiter=delimiter)
 
@@ -108,7 +108,7 @@ def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
 
     chart.replace_data(chart_data)
 
-    log.info(u"Completed chart data replacement.")
+    log.debug(u" Completed chart data replacement.")
 
     return
 
@@ -124,7 +124,7 @@ def load_data_into_chart(chart, model):
         return
 
     chart_setting = pyel.eval_el(chart_id, model)
-    log.info(u"Found chart_id: %s, chart_setting: %s" % (chart_id, chart_setting))
+    log.debug(u" Found chart_id: %s, chart_setting: %s" % (chart_id, chart_setting))
 
     txt.replace_el_in_text_frame_with_str(title_frame, chart_id, '')
     _replace_chart_data_with_csv(chart, chart_id, chart_setting)
