@@ -23,14 +23,14 @@ log = logging.getLogger()
 def _nan_to_none(x):
     # log.debug(u" type of x:%s is:%s" % (x, type(x)))
     if isinstance(x, np.generic):
-        y = None if np.isnan(x) else x.item()
+        result = None if np.isnan(x) else x.item()
     elif isinstance(x, string_types):
-        y = x if isinstance(x, type(u"a")) else unicode(x,'utf-8')
+        result = _to_unicode(x)
     else:
-        y = x
-    return y
+        result = x
+    return result
 
-def to_unicode(s):
+def _to_unicode(s):
     return s if isinstance(s, type(u"a")) else unicode(s,'utf-8')
 
 def _build_xy_chart_data(csv):
@@ -54,7 +54,7 @@ def _build_chart_data(csv):
     for i in range(1, csv.columns.size):
         col = csv.iloc[:, i]
         values = [_nan_to_none(x) for x in col.values]
-        name = to_unicode(col.name)
+        name = _to_unicode(col.name)
         log.debug(u" Adding series:%s values:%s" % (name, values))
         chart_data.add_series(name, values)
     return chart_data

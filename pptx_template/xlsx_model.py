@@ -21,7 +21,7 @@ import pptx_template.pyel as pyel
 
 log = logging.getLogger()
 
-def build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False):
+def _build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False):
     """
     Excel の範囲名（複数セル範囲）から一つの二次元配列を作る
     rect_list:    セル範囲自体の配列
@@ -37,7 +37,7 @@ def build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False)
                 if not cell:
                     value = None
                 elif hasattr(cell, 'value'):
-                    value = format_cell_value(cell) if format_cell else cell.value
+                    value = _format_cell_value(cell) if format_cell else cell.value
                 else:
                     raise ValueError("Unknown type %s for %s" % (type(cell), cell))
                 line.append(value)
@@ -51,7 +51,7 @@ def build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False)
 
     return result
 
-def write_tsv(tsv, list_of_list):
+def _write_tsv(tsv, list_of_list):
      for row in list_of_list:
          for col, value in enumerate(row):
             if col != 0:
@@ -64,7 +64,7 @@ def write_tsv(tsv, list_of_list):
 
 FRACTIONAL_PART_RE = re.compile(u"\.(0+)")
 
-def format_cell_value(cell):
+def _format_cell_value(cell):
     """
     for expample, a value 123.4567 will be formatted along with its cell.number_format:
       0     -> "123"
@@ -91,12 +91,12 @@ def format_cell_value(cell):
     else:
         return value
 
-def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
+def _extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
     log.debug(" loading from xlsx: slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value_cell.value, range_name, options))
 
     model_value = None
     if value_cell.value:
-        model_value = format_cell_value(value_cell)
+        model_value = _format_cell_value(value_cell)
     elif range_name:
         if range_name[0] == '=':
             rects = []
@@ -108,13 +108,13 @@ def extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
             rects = [xls[sheet][coords] for sheet, coords in xls.defined_names[range_name].destinations]
 
         array_mode = u"Array" in options
-        tsv = build_tsv(rects, side_by_side = u"SideBySide" in options, transpose = u"Transpose" in options, format_cell = array_mode)
+        tsv = _build_tsv(rects, side_by_side = u"SideBySide" in options, transpose = u"Transpose" in options, format_cell = array_mode)
 
         if array_mode:
             model_value = tsv
         else:
             tsv_body = StringIO()
-            write_tsv(tsv_body, tsv)
+            _write_tsv(tsv_body, tsv)
             model_value = {"tsv_body": tsv_body.getvalue()}
             tsv_body.close()
     else:
@@ -130,7 +130,7 @@ def generate_whole_model(xls, slides):
         if not slide_id or slide_id[0] == '#':
             continue
         options = options.split(' ,') if options else []
-        slides = extract_row(slides, xls, slide_id, el, cell, range_name, options)
+        slides = _extract_row(slides, xls, slide_id, el, cell, range_name, options)
     xls.close()
     xls_formula.close()
     return slides

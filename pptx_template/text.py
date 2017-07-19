@@ -14,33 +14,32 @@ from pptx.shapes.table import Table
 
 log = logging.getLogger()
 
-el_regex = re.compile(r"\{([A-Za-z0-9._\-]+)\}")
-
-slide_id_regex = re.compile(r"\{id:([A-Za-z0-9._\-]+)\}")
+_EL_RE = re.compile(r"\{([A-Za-z0-9._\-]+)\}")
+_SLIDE_ID_RE = re.compile(r"\{id:([A-Za-z0-9._\-]+)\}")
 
 def extract_slide_id(text):
-    match = slide_id_regex.search(text)
+    match = _SLIDE_ID_RE.search(text)
     if match:
         return match.group(1)
     else:
         return None
 
-def iterate_els(text):
+def _iterate_els(text):
     pos = 0
     while pos < len(text):
-        text_id_match = el_regex.search(text[pos:])
+        text_id_match = _EL_RE.search(text[pos:])
         if text_id_match:
             pos = pos + text_id_match.end(1) + 1
             yield text_id_match.group(1)
         else:
             break;
 
-def el_to_placeholder(el):
+def _el_to_placeholder(el):
     return u"{%s}" % el
 
 
 def search_first_el(text):
-    for id in iterate_els(text):
+    for id in _iterate_els(text):
         return id
     return None
 
@@ -65,13 +64,13 @@ def replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
     """
      text_frame の各 paragraph.run 中のテキストに指定の EL 形式があれば、それを replacing_text で置き換える
     """
-    placeholder = el_to_placeholder(el)
+    placeholder = _el_to_placeholder(el)
     for paragraph in text_frame.paragraphs:
         if not placeholder in paragraph.text:
             continue
 
         original_run_for_debug_log = [r.text for r in paragraph.runs]
-        ((start_run, start_pos), (end_run, end_pos)) = find_el_position([r.text for r in paragraph.runs], el)
+        ((start_run, start_pos), (end_run, end_pos)) = _find_el_position([r.text for r in paragraph.runs], el)
         for (i, run) in enumerate(paragraph.runs):
             if i == start_run and i == end_run:
                 run.text = run.text.replace(placeholder, replacing_text)
@@ -90,7 +89,7 @@ def replace_all_els_in_text_frame(text_frame, model):
     """
      text_frame 中のテキストに EL 形式が一つ以上あれば、それを model の該当する値と置き換える
     """
-    for el in iterate_els(text_frame.text):
+    for el in _iterate_els(text_frame.text):
         value = pyel.eval_el(el, model)
         if not value:
             log.error(u"Cannot find model value for {%s}" % el)
@@ -107,12 +106,12 @@ def replace_all_els_in_text_frame(text_frame, model):
         if not replace_el_in_text_frame_with_str(text_frame, el, replacing_text):
             log.error(u"Cannot find {%s} in one text-run. To fix this, select this whole EL [%s] and reset font size by clicking size up then down" % (text_id, text_frame.text))
 
-def find_el_position(texts, el):
+def _find_el_position(texts, el):
     """
     text の配列中に分かれて記述されている EL の、先頭の '\{' の位置と、最後の '\}' の位置を返す。
     それぞれの位置は (text_index, position_in_text) の形で返される。
     """
-    placeholder = el_to_placeholder(el)
+    placeholder = _el_to_placeholder(el)
     full_text = ''.join(texts)
 
     start_pos = full_text.find(placeholder)
