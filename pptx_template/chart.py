@@ -49,8 +49,7 @@ def _build_xy_chart_data(csv):
 
 def _build_chart_data(csv):
     chart_data = ChartData()
-    categories = [_nan_to_none(x) for x in csv.iloc[:,0].values]
-    categories = [u"%s" % x if x else u"c%d" % i for i,x in enumerate(categories)]
+    categories = [_nan_to_none(x) or '' for x in csv.iloc[:,0].values]
     log.debug(u" Setting categories with values:%s" % categories)
     chart_data.categories = categories
 
