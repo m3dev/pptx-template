@@ -3,6 +3,7 @@
 
 import logging
 import os.path
+import math
 from io import StringIO
 
 from pptx.shapes.graphfrm import GraphicFrame
@@ -26,6 +27,8 @@ def _nan_to_none(x):
         result = None if np.isnan(x) else x.item()
     elif isinstance(x, string_types):
         result = _to_unicode(x)
+    elif math.isnan(x):
+        result = None
     else:
         result = x
     return result
@@ -72,10 +75,10 @@ def _set_value_axis(chart, chart_id, chart_setting):
 def _load_csv_into_dataframe(chart_id, chart_setting):
     if 'body' in chart_setting:
         csv_body = chart_setting.get('body')
-        return pd.read_csv(StringIO(csv_body))
+        return pd.read_csv(StringIO(csv_body), index_col=False)
     elif 'tsv_body' in chart_setting:
         tsv_body = chart_setting.get('tsv_body')
-        return pd.read_csv(StringIO(tsv_body), delimiter='\t')
+        return pd.read_csv(StringIO(tsv_body), delimiter='\t', index_col=False)
     else:
         csv_file_name = chart_setting.get('file_name')
         if not csv_file_name:
@@ -88,13 +91,14 @@ def _load_csv_into_dataframe(chart_id, chart_setting):
 
         log.debug(u" Loading from csv file: %s" % csv_file_name)
         delimiter = '\t' if csv_file_name.endswith('.tsv') else ','
-        return pd.read_csv(csv_file_name, delimiter=delimiter)
+        return pd.read_csv(csv_file_name, delimiter=delimiter, index_col=False)
 
 def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
     """
         1つのチャートに対して指定されたCSVからデータを読み込む。
     """
     csv = _load_csv_into_dataframe(chart_id, chart_setting)
+    log.debug(u" Loaded Data:\n%s" % csv)
 
     if _is_xy_chart(chart):
         log.info(u"Setting csv/tsv into XY chart_id: %s" % chart_id)
