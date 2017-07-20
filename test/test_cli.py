@@ -23,12 +23,6 @@ class MyTest(unittest.TestCase):
         sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'model.json', '--debug']
         main()
 
-    def test_invalid_csv(self):
-        os.chdir(os.path.join(BASE_DIR, 'test', 'data'))
-        sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'model_invalid.json', '--debug']
-        with self.assertRaises(ValueError):
-            main()
-
     def test_xlsx_mode(self):
         os.chdir(os.path.join(BASE_DIR, 'test', 'data2'))
         sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'in.xlsx', '--debug']

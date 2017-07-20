@@ -90,20 +90,11 @@ def _load_csv_into_dataframe(chart_id, chart_setting):
         delimiter = '\t' if csv_file_name.endswith('.tsv') else ','
         return pd.read_csv(csv_file_name, delimiter=delimiter)
 
-def _check_data_size(chart_id, chart, csv):
-    num_csv_series = len(csv.columns) - 1
-    num_chart_series = len(chart.series)
-    log.debug(" num of csv series: %s, chart series: %s" % (num_csv_series, num_chart_series))
-    if num_csv_series < num_chart_series:
-        raise ValueError("ERROR: chart_id [%s] requires %s series, but CSV contains %s. data:\n%s" % (chart_id, num_chart_series, num_csv_series, csv))
-
 def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
     """
         1つのチャートに対して指定されたCSVからデータを読み込む。
     """
     csv = _load_csv_into_dataframe(chart_id, chart_setting)
-
-    _check_data_size(chart_id, chart, csv)
 
     if _is_xy_chart(chart):
         log.info(u"Setting csv/tsv into XY chart_id: %s" % chart_id)
