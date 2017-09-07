@@ -1,0 +1,42 @@
+{
+  "slides": {
+    "0": "remove",
+    "1": {
+      "greeting": {
+        "en": "Hello!"
+      },
+      "season": ["Spring", "Summer", "Autumn", "Winter"]
+    },
+    "2": {
+      "bars": {
+        "file_name": "chart1.csv",
+        "value_axis_max": 150,
+        "value_axis_min": 50
+      }
+    },
+    "3": {
+      "xy": {}
+    },
+    "4": {
+      "chart": {
+        "value_axis_max": 150,
+        "value_axis_min": 50
+      }
+    },
+    "5": {
+      "table": {
+      }
+    },
+    "pie": {
+      "segment": {}
+    },
+    "nan": {
+      "bars": {
+        "value_axis_max": 150,
+        "value_axis_min": 50
+      }
+    }
+  },
+  "comment": {
+  }
+}

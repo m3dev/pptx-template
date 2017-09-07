@@ -13,7 +13,7 @@ import pptx_template.chart as ch
 
 log = logging.getLogger()
 
-def edit_slide(slide, model):
+def edit_slide(slide, model, skip_model_not_found = False):
     """
         1つのスライドに対して文字列置換およびチャートCSV設定を行う
         チャート設定や文字列置換は1スライドに対して複数持てる。配列やdictなどで引渡し、pptxからはEL式で特定する
@@ -29,13 +29,25 @@ def edit_slide(slide, model):
 
     # pptx内の TextFrame の EL表記を model の値で置換する
     for shape in txt.select_all_text_shapes(slide):
-        txt.replace_all_els_in_text_frame(shape.text_frame, model)
+        try:
+            txt.replace_all_els_in_text_frame(shape.text_frame, model)
+        except:
+            if not skip_model_not_found:
+                raise
     for shape in txt.select_all_tables(slide):
-        txt.replace_all_els_in_table(shape, model)
+        try:
+            txt.replace_all_els_in_table(shape, model)
+        except:
+            if not skip_model_not_found:
+                raise
 
     # pptx内の 各チャートに対してcsvの値を設定する
     for chart in ch.select_all_chart_shapes(slide):
-        ch.load_data_into_chart(chart, model)
+        try:
+            ch.load_data_into_chart(chart, model)
+        except:
+            if not skip_model_not_found:
+                raise
 
 
 def remove_slide(presentation, slide):
