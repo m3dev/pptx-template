@@ -1,4 +1,4 @@
-# pptx-template
+# pptx-template [![Build Status](https://travis-ci.org/m3dev/pptx-template.svg?branch=master)](https://travis-ci.org/m3dev/pptx-template)
 
 ## Overview
 
