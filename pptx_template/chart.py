@@ -114,11 +114,15 @@ def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
 
 
 def load_data_into_chart(chart, model):
+    log.debug(u"model:%s" % model)
     # チャートタイトルから {} で囲まれた文字列を探し、それをキーとしてチャート設定と紐付ける
     if not chart.has_title or not chart.chart_title.has_text_frame:
         return
 
+    # チャートタイトル中のEL式の置換を行う
     title_frame = chart.chart_title.text_frame
+    txt.replace_all_els_in_text_frame(title_frame, model)
+
     chart_id = txt.search_first_el(title_frame.text)
     if not chart_id:
         return
@@ -126,8 +130,13 @@ def load_data_into_chart(chart, model):
     chart_setting = pyel.eval_el(chart_id, model)
     log.debug(u" Found chart_id: %s, chart_setting: %s" % (chart_id, chart_setting))
 
+    # チャートタイトル中のチャートIDを削除
     txt.replace_el_in_text_frame_with_str(title_frame, chart_id, '')
+
+    # チャートにデータを流し込む
     _replace_chart_data_with_csv(chart, chart_id, chart_setting)
+
+    # 軸の最大値、最小値を設定
     _set_value_axis(chart, chart_id, chart_setting)
 
 def select_all_chart_shapes(slide):
