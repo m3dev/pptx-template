@@ -9,6 +9,7 @@ from io import StringIO
 from pptx.shapes.graphfrm import GraphicFrame
 from pptx.chart.data import ChartData, XyChartData
 from pptx.enum.chart import XL_CHART_TYPE as ct
+from pptx.chart.chart import Chart
 
 import pandas as pd
 import numpy as np
@@ -47,7 +48,7 @@ def _build_xy_chart_data(csv):
             series.add_data_point(x, y)
     return chart_data
 
-def _build_chart_data(csv):
+def _build_chart_data(csv, number_format):
     chart_data = ChartData()
     categories = [_nan_to_none(x) or '' for x in csv.iloc[:,0].values]
     log.debug(u" Setting categories with values:%s" % categories)
@@ -58,7 +59,13 @@ def _build_chart_data(csv):
         values = [_nan_to_none(x) for x in col.values]
         name = _to_unicode(col.name)
         log.debug(u" Adding series:%s values:%s" % (name, values))
-        chart_data.add_series(name, values)
+        """
+        本来、number_formatは既存のchartの設定をそのまま引き継ぎたかったが、
+        python-pptx v0.6.17 では、既存のchartのchart_dataを取得するAPIは存在せず、
+        新たにchart_dataを作って、chart.replace_data() する必要がある。
+        そのため、number_formatは、modelのoptionから取得する方針とする。
+        """
+        chart_data.add_series(name, values, number_format)
     return chart_data
 
 def _is_xy_chart(chart):
@@ -99,12 +106,13 @@ def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
     csv = _load_csv_into_dataframe(chart_id, chart_setting)
     log.debug(u" Loaded Data:\n%s" % csv)
 
+    number_format = chart_setting.get("number_format")
     if _is_xy_chart(chart):
         log.info(u"Setting csv/tsv into XY chart_id: %s" % chart_id)
-        chart_data = _build_xy_chart_data(csv)
+        chart_data = _build_xy_chart_data(csv, number_format)
     else:
         log.info(u"Setting csv/tsv into chart_id: %s" % chart_id)
-        chart_data = _build_chart_data(csv)
+        chart_data = _build_chart_data(csv, number_format)
 
     chart.replace_data(chart_data)
 

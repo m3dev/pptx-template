@@ -93,6 +93,7 @@ def _format_cell_value(cell):
 
 def _extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
     log.debug(" loading from xlsx: slide_id:%s EL:%s value:%s range:%s options:%s" % (slide_id, el, value_cell.value, range_name, options))
+    number_format = _get_number_format_from_options(options)
 
     model_value = None
     if value_cell.value:
@@ -115,7 +116,7 @@ def _extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
         else:
             tsv_body = StringIO()
             _write_tsv(tsv_body, tsv)
-            model_value = {"tsv_body": tsv_body.getvalue()}
+            model_value = {"tsv_body": tsv_body.getvalue(), "number_format": number_format}
             tsv_body.close()
     else:
          raise ValueError("One of value or range_name required.")
@@ -147,3 +148,10 @@ def build_model_sheet_rows(xls_filename):
     model_sheet_formula = xls_formula['model']
     rows = zip(model_sheet_data.rows, model_sheet_formula.rows)
     return (xls, xls_formula, rows)
+
+def _get_number_format_from_options(options):
+    for option in options:
+        NUMBER_FORMAT_KEY = "NumberFormat"
+        if option.startswith(NUMBER_FORMAT_KEY):
+            return option[len(NUMBER_FORMAT_KEY)+1:]
+    return None
