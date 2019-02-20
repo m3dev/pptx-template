@@ -43,5 +43,11 @@ class MyTest(unittest.TestCase):
         sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'in.xlsx', '--debug']
         main()
 
+    def test_data_load_into_table(self):
+        os.chdir(os.path.join(BASE_DIR, 'test', 'data3'))
+        sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'in.xlsx', '--debug']
+        main()
+
+
 if __name__ == '__main__':
     unittest.main()
