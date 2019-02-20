@@ -37,13 +37,13 @@ def _nan_to_none(x):
 def _to_unicode(s):
     return s if isinstance(s, type(u"a")) else unicode(s,'utf-8')
 
-def _build_xy_chart_data(csv):
+def _build_xy_chart_data(csv, number_format):
     chart_data = XyChartData()
     for i in range(1, csv.columns.size):
-        series = chart_data.add_series(csv.columns[i])
+        series = chart_data.add_series(csv.columns[i], number_format=number_format)
         xy_col = csv.iloc[:, [0, i]]
         for (_, row) in xy_col.iterrows():
-            y, x = _nan_to_none(row[0]), _nan_to_none(row[1])
+            x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
             log.debug(u" Adding xy %s,%s" % (x, y))
             series.add_data_point(x, y)
     return chart_data
