@@ -1,4 +1,3 @@
-#
 # coding=utf-8
 
 from io import StringIO
@@ -39,13 +38,13 @@ def _load_data(table, table_setting):
     df = pd.read_csv(StringIO(tsv_body), delimiter='\t', index_col=False, header=None)
 
     # データ流し込み
-    for (i, row) in enumerate(table.rows):
-        for (j, cell) in enumerate(row.cells):
-            for (k, paragraph) in enumerate(cell.text_frame.paragraphs):
-                if k == 0:
-                    for (l, run) in enumerate(paragraph.runs):
-                        if l == 0:
-                            val = df.iloc[i, j]
+    for (irow, row) in enumerate(table.rows):
+        for (icell, cell) in enumerate(row.cells):
+            for (iparagraph, paragraph) in enumerate(cell.text_frame.paragraphs):
+                if iparagraph == 0:
+                    for (irun, run) in enumerate(paragraph.runs):
+                        if irun == 0:
+                            val = df.iloc[irow, icell]
                             run.text = "" if pd.isnull(val) else str(val)
                         else:
                             run.text = ""

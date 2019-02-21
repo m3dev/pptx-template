@@ -60,12 +60,10 @@ def _build_chart_data(csv, number_format):
         values = [_nan_to_none(x) for x in col.values]
         name = _to_unicode(col.name)
         log.debug(u" Adding series:%s values:%s" % (name, values))
-        """
-        本来、number_formatは既存のchartの設定をそのまま引き継ぎたかったが、
-        python-pptx v0.6.17 では、既存のchartのchart_dataを取得するAPIは存在せず、
-        新たにchart_dataを作って、chart.replace_data() する必要がある。
-        そのため、number_formatは、modelのoptionから取得する方針とする。
-        """
+        # 本来、number_formatは既存のchartの設定をそのまま引き継ぎたかったが、
+        # python-pptx v0.6.17 では、既存のchartのchart_dataを取得するAPIは存在せず、
+        # 新たにchart_dataを作って、chart.replace_data() する必要がある。
+        # そのため、number_formatは、modelのoptionから取得する方針とする。
         chart_data.add_series(name, values, number_format)
     return chart_data
 
