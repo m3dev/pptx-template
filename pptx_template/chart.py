@@ -40,7 +40,8 @@ def _to_unicode(s):
 def _build_xy_chart_data(csv, number_format):
     chart_data = XyChartData()
     for i in range(1, csv.columns.size):
-        series = chart_data.add_series(csv.columns[i], number_format=number_format)
+        # nameに日本語が入ると後続処理中で、python v2.7の場合にUnicodeDecodeErrorが出るため対処。nameは結局pptx内では使われない
+        series = chart_data.add_series(u"column%s" % i, number_format=number_format)
         xy_col = csv.iloc[:, [0, i]]
         for (_, row) in xy_col.iterrows():
             x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
@@ -103,6 +104,7 @@ def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
     """
         1つのチャートに対して指定されたCSVからデータを読み込む。
     """
+    log.debug(chart_setting)
     csv = _load_csv_into_dataframe(chart_id, chart_setting)
     log.debug(u" Loaded Data:\n%s" % csv)
 

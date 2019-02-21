@@ -59,7 +59,7 @@ def _write_tsv(tsv, list_of_list):
             if value != None:
                 tsv.write(u"%s" % value)
             else:
-                tsv.write('')
+                tsv.write(u"")
          tsv.write(u"\n")
 
 FRACTIONAL_PART_RE = re.compile(u"\.(0+)")
