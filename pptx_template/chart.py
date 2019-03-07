@@ -133,19 +133,20 @@ def load_data_into_chart(chart, model):
     if not chart.has_title or not chart.chart_title.has_text_frame:
         return
 
-    # チャートタイトル中のEL式の置換を行う
+    # チャートIDを取得
     title_frame = chart.chart_title.text_frame
-    txt.replace_all_els_in_text_frame(title_frame, model)
-
     chart_id = txt.search_first_el(title_frame.text)
     if not chart_id:
         return
 
-    chart_setting = pyel.eval_el(chart_id, model)
-    log.debug(u" Found chart_id: %s, chart_setting: %s" % (chart_id, chart_setting))
-
     # チャートタイトル中のチャートIDを削除
     txt.replace_el_in_text_frame_with_str(title_frame, chart_id, '')
+
+    # チャートタイトル中のEL式の置換を行う
+    txt.replace_all_els_in_text_frame(title_frame, model)
+
+    chart_setting = pyel.eval_el(chart_id, model)
+    log.debug(u" Found chart_id: %s, chart_setting: %s" % (chart_id, chart_setting))
 
     # チャートにデータを流し込む
     _replace_chart_data_with_csv(chart, chart_id, chart_setting)
