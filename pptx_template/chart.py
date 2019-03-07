@@ -37,14 +37,17 @@ def _nan_to_none(x):
 def _to_unicode(s):
     return s if isinstance(s, type(u"a")) else unicode(s,'utf-8')
 
-def _build_xy_chart_data(csv, number_format):
+def _build_xy_chart_data(csv, xy_transpose, number_format):
     chart_data = XyChartData()
     for i in range(1, csv.columns.size):
         # nameに日本語が入ると後続処理中で、python v2.7の場合にUnicodeDecodeErrorが出るため対処。nameは結局pptx内では使われない
         series = chart_data.add_series(u"column%s" % i, number_format=_normalize_number_format(number_format))
         xy_col = csv.iloc[:, [0, i]]
         for (_, row) in xy_col.iterrows():
-            x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
+            if xy_transpose:
+                x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
+            else:
+                y, x = _nan_to_none(row[0]), _nan_to_none(row[1])
             log.debug(u" Adding xy %s,%s" % (x, y))
             series.add_data_point(x, y)
     return chart_data
@@ -113,9 +116,10 @@ def _replace_chart_data_with_csv(chart, chart_id, chart_setting):
     log.debug(u" Loaded Data:\n%s" % csv)
 
     number_format = chart_setting.get("number_format")
+    xy_transpose = chart_setting.get("xy_transpose")
     if _is_xy_chart(chart):
         log.info(u"Setting csv/tsv into XY chart_id: %s" % chart_id)
-        chart_data = _build_xy_chart_data(csv, number_format)
+        chart_data = _build_xy_chart_data(csv, xy_transpose, number_format)
     else:
         log.info(u"Setting csv/tsv into chart_id: %s" % chart_id)
         chart_data = _build_chart_data(csv, number_format)

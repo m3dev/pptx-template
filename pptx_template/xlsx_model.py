@@ -116,7 +116,7 @@ def _extract_row(slides, xls, slide_id, el, value_cell, range_name, options):
         else:
             tsv_body = StringIO()
             _write_tsv(tsv_body, tsv)
-            model_value = {"tsv_body": tsv_body.getvalue(), "number_format": number_format}
+            model_value = {"tsv_body": tsv_body.getvalue(), "number_format": number_format, "xy_transpose": u"XYTranspose" in options}
             tsv_body.close()
     else:
          raise ValueError("One of value or range_name required.")
