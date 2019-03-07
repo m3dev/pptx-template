@@ -43,5 +43,17 @@ class MyTest(unittest.TestCase):
         sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'in.xlsx', '--debug']
         main()
 
+    def test_data_load_into_table(self):
+        """
+        以下の3つの動作を行った上で、エラー無くpptxが作成されることを確認する
+        * pptx内のテーブルに、excelの表データを流し込む
+        * pptx内のチャートのタイトル中のEL式を置換する
+        * pptx内のチャートのデータの数値フォーマット（例：0.0%）をexcelから設定する
+        """
+        os.chdir(os.path.join(BASE_DIR, 'test', 'data3'))
+        sys.argv = ['myprog', '--out', 'out.pptx', '--template', 'in.pptx', '--model', 'in.xlsx', '--debug']
+        main()
+
+
 if __name__ == '__main__':
     unittest.main()

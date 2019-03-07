@@ -10,6 +10,7 @@ import logging
 import pptx_template.pptx_util as util
 import pptx_template.text as txt
 import pptx_template.chart as ch
+import pptx_template.table as tb
 
 log = logging.getLogger()
 
@@ -49,6 +50,13 @@ def edit_slide(slide, model, skip_model_not_found = False):
             if not skip_model_not_found:
                 raise
 
+    # pptx内の 各テーブルに対してcsvの値を設定する
+    for shape in txt.select_all_tables(slide):
+        try:
+            tb.load_data_into_table(shape, model)
+        except:
+            if not skip_model_not_found:
+                raise
 
 def remove_slide(presentation, slide):
     """

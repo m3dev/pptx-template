@@ -5,3 +5,4 @@ build
 dist
 test/data/out.pptx
 test/data2/out.pptx
+test/data3/out.pptx
