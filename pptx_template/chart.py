@@ -41,7 +41,7 @@ def _build_xy_chart_data(csv, number_format):
     chart_data = XyChartData()
     for i in range(1, csv.columns.size):
         # nameに日本語が入ると後続処理中で、python v2.7の場合にUnicodeDecodeErrorが出るため対処。nameは結局pptx内では使われない
-        series = chart_data.add_series(u"column%s" % i, number_format=number_format)
+        series = chart_data.add_series(u"column%s" % i, number_format=_normalize_number_format(number_format))
         xy_col = csv.iloc[:, [0, i]]
         for (_, row) in xy_col.iterrows():
             x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
@@ -64,8 +64,14 @@ def _build_chart_data(csv, number_format):
         # python-pptx v0.6.17 では、既存のchartのchart_dataを取得するAPIは存在せず、
         # 新たにchart_dataを作って、chart.replace_data() する必要がある。
         # そのため、number_formatは、modelのoptionから取得する方針とする。
-        chart_data.add_series(name, values, number_format)
+        chart_data.add_series(name, values, _normalize_number_format(number_format))
     return chart_data
+
+def _normalize_number_format(number_format):
+    """
+    pptx.chartの内部で、'\\'が’\'扱いになってしまうため、更にエスケープ処理を行う
+    """
+    return number_format.replace('\\','\\\\') if number_format != None else number_format
 
 def _is_xy_chart(chart):
     xy_charts = [ct.XY_SCATTER_LINES, ct.XY_SCATTER_LINES_NO_MARKERS, ct.XY_SCATTER, ct.XY_SCATTER_SMOOTH, ct.XY_SCATTER_SMOOTH_NO_MARKERS]

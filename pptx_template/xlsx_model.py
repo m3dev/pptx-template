@@ -151,7 +151,7 @@ def build_model_sheet_rows(xls_filename):
 
 def _get_number_format_from_options(options):
     for option in options:
-        NUMBER_FORMAT_KEY = "NumberFormat"
+        NUMBER_FORMAT_KEY = "NumberFormat:"
         if option.startswith(NUMBER_FORMAT_KEY):
-            return option[len(NUMBER_FORMAT_KEY)+1:]
+            return option[len(NUMBER_FORMAT_KEY):]
     return None
