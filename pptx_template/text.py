@@ -45,8 +45,16 @@ def search_first_el(text):
 
 
 def select_all_text_shapes(slide):
-    return [ s for s in slide.shapes if s.shape_type in [1,14,17] ]
-
+    text_shapes = []
+    for s in slide.shapes:
+        try:
+            shape_type = s.shape_type
+            if shape_type in [1, 14, 17]:
+                text_shapes.append(s)
+        except NotImplementedError:
+            # 未実装のオートシェイプなどの対応
+            log.info("not implemented shape was detected.")
+    return text_shapes
 
 def select_all_tables(slide):
     return [ s.table for s in slide.shapes if isinstance(s, GraphicFrame) and s.shape_type == 19 ]
