@@ -45,9 +45,9 @@ def _build_xy_chart_data(csv, xy_transpose, number_format):
         xy_col = csv.iloc[:, [0, i]]
         for (_, row) in xy_col.iterrows():
             if xy_transpose:
-                x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
-            else:
                 y, x = _nan_to_none(row[0]), _nan_to_none(row[1])
+            else:
+                x, y = _nan_to_none(row[0]), _nan_to_none(row[1])
             log.debug(u" Adding xy %s,%s" % (x, y))
             series.add_data_point(x, y)
     return chart_data
