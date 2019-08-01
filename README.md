@@ -9,7 +9,7 @@ This helps your routine reporting work that have many manual copy-paste from exc
   - Building a new powerpoint presentation file from a "template" pptx file which contains "id"
   - Import some strings and CSV data which is defined in a JSON config file or a Python dict
   - "id" in pptx template is expressed as a tiny DSL, like "{sales.0.june.us}"
-  - requires python envirionment (2 or 3), pandas, python-pptx
+  - requires python envirionment (3), pandas, python-pptx
   - for now, only UTF-8 encoding is supported for json, csv
 
 ### Text substitution
@@ -25,7 +25,7 @@ pptx-template は pptx のテンプレートを元に、別途用意した JSON 
 定型レポートなどで大量のグラフ付きスライドを作成する際の作業を代行してくれます。
 
   - テンプレートには "{sales.0.june.us}" のような形で JSON内の値を指す id を記入できます
-  - python 2 または 3, pandas, pptx に依存しています
+  - python 3, pandas, pptx に依存しています
   - 扱う json や csv の 文字コードは utf-8 前提です
 
 ## Getting started
