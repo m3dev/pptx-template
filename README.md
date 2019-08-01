@@ -43,46 +43,23 @@ $ pptx-template --out out.pptx --template test.pptx --model model.json
 
 ## Development (Japanese)
 
-ローカル開発環境構築（Mac）
+### インストールの流れ
 
-1. pythonインストール
-
-```
-brew install pyenv
-
-pyenv install 3.5.6
-pyenv install 3.7.1
-```
-
-2. 必要なパッケージをインストール
-
-```
-# インストール済みバージョン確認
-pyenv versions
-
-
-# pythonバージョン切り替え ※各バージョンで実行必要
-pyenv shell 3.5.6
-
-# インストール
-pip install numpy
-pip install pytest
-pip install -r requirements.txt
-```
-
-3. git clone
-
+pyenvをインストールしておく
 ```
 git clone https://github.com/m3dev/pptx-template.git
+
+pyenv install 3.7.1 # Pythonをインストール
+pyenv shell 3.7.1 # シェルで使うPython
+
+venv .venv # 開発用の仮想環境を作成
+source .venv/bin/activate # 仮想環境を使用する
+
+python setup.py develop        # パッケージを開発用にインストール＆依存パッケージをインストール
+pip install -r requirements.txt # 開発用のパッケージをインストール
 ```
 
-4. 環境変数設定
-
-```
-export PYTHONPATH={プロジェクトフォルダ}
-```
-
-5. REPLで実行 ※開発時はこの方法
+### REPLで実行 ※開発時はこの方法
 
 pythonのREPLを起動
 
@@ -118,20 +95,20 @@ reload(sys.modules.get('pptx_template.cli'))
 cli.main()
 ```
 
-6. コマンドラインで実行 ※githubに上がっているものの動作確認をしたい場合はこの方法
+### コマンドラインで実行 ※githubに上がっているものの動作確認をしたい場合はこの方法
 
 ```
 ## pptx_template --out {出力pptxファイルパス} --template {テンプレートpptxファイルパス} --model {設定xlsxファイルパス}  --debug
 pptx_template --out test/data3/out.pptx --template test/data3/in.pptx --model test/data3/in.xlsx  --debug
 ```
 
-7. テスト実行
+### テスト実行
 
 ```
 pytest
 ```
 
-## ロールアウト手順
+### ロールアウト手順
 1. featureブランチを作成する
 2. 実装する
 3. 全pythonバージョンでtestが動くようにする
@@ -142,7 +119,7 @@ pytest
 8. pll requestをマージする
 9. PyPIにアップロードする（PyPIのリポジトリ管理者のみ可）
 
-## PyPIへのアップロード手順
+### PyPIへのアップロード手順
 1. パッケージインストール
 
 ```
