@@ -18,7 +18,7 @@ setup(name='pptx-template',
       license='Apache-2.0',
       packages=['pptx_template'],
       test_suite='test',
-      install_requires=['python-pptx==0.6.6', 'pandas>=0.18.0', 'openpyxl>=2.4.7'],
+      install_requires=['python-pptx==0.6.6', 'pandas >=0.22,<=0.24.0', 'openpyxl>=2.4.7'],
       keywords=['powerpoint', 'ppt', 'pptx'],
       entry_points={ "console_scripts": [ "pptx_template=pptx_template.cli:main"]},
       classifiers=[
