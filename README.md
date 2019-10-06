@@ -13,20 +13,12 @@ This helps your routine reporting work that have many manual copy-paste from exc
   - for now, only UTF-8 encoding is supported for json, csv
 
 ### Text substitution
-!<img src="docs/01.png?raw=true" width="80%" />
+
+<img src="docs/01.png?raw=true" width="80%" />
 
 ### CSV Import
-!<img src="docs/02.png?raw=true" width="80%" />
 
-## Japanese translation
-
-pptx-template は pptx のテンプレートを元に、別途用意した JSON 中の文字列や CSV データを差し込んだ pptx を生成するツールです。
-
-定型レポートなどで大量のグラフ付きスライドを作成する際の作業を代行してくれます。
-
-  - テンプレートには "{sales.0.june.us}" のような形で JSON内の値を指す id を記入できます
-  - python 3, pandas, pptx に依存しています
-  - 扱う json や csv の 文字コードは utf-8 前提です
+<img src="docs/02.png?raw=true" width="80%" />
 
 ## Getting started
 
@@ -41,35 +33,36 @@ $ echo '{ "slides": [ { "greeting" : "Hello!!" } ] }' > model.json
 $ pptx-template --out out.pptx --template test.pptx --model model.json
 ```
 
-## Development (Japanese)
+## Development
 
-### インストールの流れ
+### Installation
 
-pyenvをインストールしておく
+Install using `pyenv`
+
 ```
 git clone https://github.com/m3dev/pptx-template.git
 
-pyenv install 3.7.1 # Pythonをインストール
-pyenv shell 3.7.1 # シェルで使うPython
+pyenv install 3.7.1 # Install Python
+pyenv shell 3.7.1 # Create Python shell
 
-venv .venv # 開発用の仮想環境を作成
-source .venv/bin/activate # 仮想環境を使用する
+venv .venv # Create virtual environment for development
+source .venv/bin/activate # Use the virtual environment for development
 
-python setup.py develop        # パッケージを開発用にインストール＆依存パッケージをインストール
-pip install -r requirements.txt # 開発用のパッケージをインストール
+python setup.py develop         # Setup egg-info folder for development & Install dependencies
+pip install -r requirements.txt # Install dependencies
 ```
 
-### REPLで実行 ※開発時はこの方法
+### Run with REPL - Use this for development
 
-pythonのREPLを起動
+Launch the Python REPL client
 
 ```
-cd {プロジェクトフォルダ}
+cd {project folder}
 pyenv shell 3.7.1
 python
 ```
 
-REPL内で実行
+Run the following with the Python REPL
 
 ```
 import sys
@@ -77,15 +70,15 @@ from importlib import reload
 import pptx_template.cli as cli
 
 
-## 実行引数設定
-## sys.argv = ['{pyファイル名}', '--out', '{出力pptxファイルパス}', '--template', '{テンプレートpptxファイルパス}', '--model', '{設定xlsxファイルパス}', '--debug']
-## 以下の設定でテストファイルにて実行できます
+## Argument Settings
+## sys.argv = ['{filename.py}', '--out', '{file/path/output.pptx}', '--template', '{file/path/template.pptx}', '--model', '{file/path/data.xlsx}', '--debug']
+## Following is an example with test files
 sys.argv = ['dummy.py', '--out', 'test/data3/out.pptx', '--template', 'test/data3/in.pptx', '--model', 'test/data3/in.xlsx', '--debug']
 
-## 実行
+## Run the program
 cli.main()
 
-## 変更したソースをリロードして実行
+## Run the following after modifying the source code
 reload(sys.modules.get('pptx_template.xlsx_model'))
 reload(sys.modules.get('pptx_template.text'))
 reload(sys.modules.get('pptx_template.table'))
@@ -95,45 +88,47 @@ reload(sys.modules.get('pptx_template.cli'))
 cli.main()
 ```
 
-### コマンドラインで実行 ※githubに上がっているものの動作確認をしたい場合はこの方法
+### Run via CLI
 
 ```
-## pptx_template --out {出力pptxファイルパス} --template {テンプレートpptxファイルパス} --model {設定xlsxファイルパス}  --debug
+## pptx_template --out {file/path/output.pptx} --template {file/path/template.pptx} --model {file/path/data.xlsx}  --debug
 pptx_template --out test/data3/out.pptx --template test/data3/in.pptx --model test/data3/in.xlsx  --debug
 ```
 
-### テスト実行
+### Run Tests
 
 ```
 pytest
 ```
 
-### ロールアウト手順
-1. featureブランチを作成する
-2. 実装する
-3. 全pythonバージョンでtestが動くようにする
-4. pushする
-5. github上でpull requestを作成する
-6. コードレビューを依頼する
-7. QAを実施する（QAする人は、上記ローカル環境構築が必要）
-8. pll requestをマージする
-9. PyPIにアップロードする（PyPIのリポジトリ管理者のみ可）
+### Deployment Process
 
-### PyPIへのアップロード手順
-1. パッケージインストール
+1. Create a feature branch
+2. Implement the new feature
+3. Test with all versions of Python
+4. Push changes to the feature branch
+5. Create a Pull Request on Github
+6. Request a code review
+7. Verify QA（If you want to verify QA、build the source in your local environment）
+8. Merge Pull Request
+9. Upload to PyPI（Only for PyPI repository administrators）
+
+### Upload to PyPI
+
+1. Install packages needed for uploading to PyPI
 
 ```
 pip install wheel
 pip install twine
 ```
 
-2. コンパイル
+2. Compile
 
 ```
 python setup.py bdist_wheel
 ```
 
-3. PyPIにアップロード
+3. Upload to PyPI
 
 ```
 twine upload dist/*
