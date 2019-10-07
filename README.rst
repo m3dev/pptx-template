@@ -12,7 +12,6 @@ This helps your routine reporting work that have many manual copy-paste from exc
   - requires python envirionment (2 or 3), pandas, python-pptx
   - for now, only UTF-8 encoding is supported for json, csv
 
-For further information, please visit GitHub: https://github.com/m3dev/pptx-template
 
 changelogs
 ==========
