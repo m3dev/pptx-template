@@ -10,6 +10,8 @@ pptx-template は pptx のテンプレートを元に、別途用意した JSON 
   - python 3, pandas, pptx に依存しています
   - 扱う json や csv の 文字コードは utf-8 前提です
 
+詳細はこちらを参照してください: GitHub: https://github.com/m3dev/pptx-template
+
 ### Text substitution
 
 <img src="docs/01.png?raw=true" width="80%" />
