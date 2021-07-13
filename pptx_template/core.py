@@ -81,7 +81,9 @@ def remove_all_slides_having_id(presentation):
     unused_slides = []
     for slide in presentation.slides:
         for shape in txt.select_all_text_shapes(slide):
-            slide_id = txt.extract_slide_id(shape.text)
+            slide_id = None
+            if hasattr(shape, 'text'):
+                slide_id = txt.extract_slide_id(shape.text)
             if slide_id:
                 unused_slides.append((slide_id, slide))
                 break
@@ -96,6 +98,6 @@ def get_slide(presentation, slide_id):
     """
     for slide in presentation.slides:
         for shape in txt.select_all_text_shapes(slide):
-            if txt.extract_slide_id(shape.text) == slide_id:
+            if hasattr(shape, 'text') and txt.extract_slide_id(shape.text) == slide_id:
                 return slide
     raise ValueError(u"slide id:%s not found" % slide_id)
