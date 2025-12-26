@@ -1,4 +1,8 @@
-# pptx-template [![Build Status](https://travis-ci.org/m3dev/pptx-template.svg?branch=master)](https://travis-ci.org/m3dev/pptx-template)
+# pptx-template
+
+[![Test](https://github.com/m3dev/pptx-template/actions/workflows/test.yml/badge.svg)](https://github.com/m3dev/pptx-template/actions/workflows/test.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
 
 ## Overview
 
@@ -9,8 +13,8 @@ This helps your routine reporting work that have many manual copy-paste from exc
   - Building a new powerpoint presentation file from a "template" pptx file which contains "id"
   - Import some strings and CSV data which is defined in a JSON config file or a Python dict
   - "id" in pptx template is expressed as a tiny DSL, like "{sales.0.june.us}"
-  - requires python envirionment (3), pandas, python-pptx
-  - for now, only UTF-8 encoding is supported for json, csv
+  - Requires Python 3.10+, pandas, python-pptx
+  - For now, only UTF-8 encoding is supported for json, csv
 
 ### Text substitution
 
@@ -22,63 +26,84 @@ This helps your routine reporting work that have many manual copy-paste from exc
 
 ## Getting started
 
-TBD
-
-```
-$ pip install pptx-template
-$ echo '{ "slides": [ { "greeting" : "Hello!!" } ] }' > model.json
+```bash
+pip install pptx-template
+echo '{ "slides": [ { "greeting" : "Hello!!" } ] }' > model.json
 
 # prepare your template file (test.pptx) which contains "{greeting}" in somewhere
 
-$ pptx-template --out out.pptx --template test.pptx --model model.json
+pptx_template --out out.pptx --template test.pptx --model model.json
 ```
 
 ## Development
 
+### Requirements
+
+- Python 3.10, 3.11, 3.12, or 3.13
+- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+
 ### Installation
 
-Install using `pyenv`
-
-```
+```bash
 git clone https://github.com/m3dev/pptx-template.git
+cd pptx-template
 
-pyenv install 3.7.1 # Install Python
-pyenv shell 3.7.1 # Create Python shell
+# Using uv (recommended)
+uv sync --extra dev
 
-venv .venv # Create virtual environment for development
-source .venv/bin/activate # Use the virtual environment for development
-
-python setup.py develop         # Setup egg-info folder for development & Install dependencies
-pip install -r requirements.txt # Install dependencies
+# Or using pip
+pip install -e ".[dev]"
 ```
 
-### Run with REPL - Use this for development
+### Run Tests
 
-Launch the Python REPL client
+```bash
+# Using uv
+uv run --extra dev pytest
 
+# Or with a specific Python version
+uv run --python 3.13 --extra dev pytest
+
+# Using pip (after installation)
+pytest
 ```
-cd {project folder}
-pyenv shell 3.7.1
-python
+
+### Run via CLI
+
+```bash
+# Using uv
+uv run pptx_template \
+  --template test/data3/in.pptx \
+  --model test/data3/in.xlsx \
+  --out test/data3/out.pptx \
+  --debug
+
+# After pip install
+pptx_template \
+  --template test/data3/in.pptx \
+  --model test/data3/in.xlsx \
+  --out test/data3/out.pptx \
+  --debug
 ```
 
-Run the following with the Python REPL
+### Run with REPL (for development)
 
+```bash
+uv run python
 ```
+
+```python
 import sys
 from importlib import reload
 import pptx_template.cli as cli
 
-
-## Argument Settings
-## sys.argv = ['{filename.py}', '--out', '{file/path/output.pptx}', '--template', '{file/path/template.pptx}', '--model', '{file/path/data.xlsx}', '--debug']
-## Following is an example with test files
+# Set arguments
 sys.argv = ['dummy.py', '--out', 'test/data3/out.pptx', '--template', 'test/data3/in.pptx', '--model', 'test/data3/in.xlsx', '--debug']
 
-## Run the program
+# Run
 cli.main()
 
-## Run the following after modifying the source code
+# After modifying source code, reload and run again
 reload(sys.modules.get('pptx_template.xlsx_model'))
 reload(sys.modules.get('pptx_template.text'))
 reload(sys.modules.get('pptx_template.table'))
@@ -88,48 +113,24 @@ reload(sys.modules.get('pptx_template.cli'))
 cli.main()
 ```
 
-### Run via CLI
-
-```
-## pptx_template --out {file/path/output.pptx} --template {file/path/template.pptx} --model {file/path/data.xlsx}  --debug
-pptx_template --out test/data3/out.pptx --template test/data3/in.pptx --model test/data3/in.xlsx  --debug
-```
-
-### Run Tests
-
-```
-pytest
-```
-
 ### Deployment Process
 
 1. Create a feature branch
 2. Implement the new feature
-3. Test with all versions of Python
+3. Test with all versions of Python (3.10, 3.11, 3.12, 3.13)
 4. Push changes to the feature branch
-5. Create a Pull Request on Github
+5. Create a Pull Request on GitHub
 6. Request a code review
-7. Verify QA（If you want to verify QA、build the source in your local environment）
+7. Verify QA
 8. Merge Pull Request
-9. Upload to PyPI（Only for PyPI repository administrators）
+9. Upload to PyPI (Only for PyPI repository administrators)
 
 ### Upload to PyPI
 
-1. Install packages needed for uploading to PyPI
+```bash
+# Build
+uv build
 
-```
-pip install wheel
-pip install twine
-```
-
-2. Compile
-
-```
-python setup.py bdist_wheel
-```
-
-3. Upload to PyPI
-
-```
-twine upload dist/*
+# Upload to PyPI
+uv publish
 ```

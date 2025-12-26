@@ -8,12 +8,9 @@ import argparse
 import json
 import shutil
 import os
-import tempfile
 
-import openpyxl as xl
 from io import open, TextIOWrapper
 from pptx import Presentation
-from six import iteritems
 from itertools import islice
 
 from pptx_template.core import edit_slide, remove_slide, get_slide, remove_slide_id, remove_all_slides_having_id
@@ -29,7 +26,7 @@ def process_one_slide(ppt, slide, model, skip_model_not_found = False):
 
 def process_all_slides(slides, ppt, skip_model_not_found = False):
     if isinstance(slides, dict):
-        for (slide_id, model) in iteritems(slides):
+        for (slide_id, model) in slides.items():
             slide = get_slide(ppt, slide_id)
             remove_slide_id(ppt, slide_id)
             log.info("Processing slide_id: %s" % slide_id)
@@ -81,8 +78,4 @@ def main():
 log = logging.getLogger()
 
 if __name__ == '__main__':
-    if sys.version_info[0] == 2:
-        reload(sys)
-        sys.setdefaultencoding('utf-8')
-
     main()

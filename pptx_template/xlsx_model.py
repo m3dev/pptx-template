@@ -11,10 +11,7 @@ import re
 from io import open, StringIO
 
 import openpyxl as xl
-from six import iteritems, moves
-from itertools import islice
-
-from six import string_types
+from itertools import islice, zip_longest
 import numbers
 
 import pptx_template.pyel as pyel
@@ -47,7 +44,7 @@ def _build_tsv(rect_list, side_by_side=False, transpose=False, format_cell=False
                 result.append(line)
 
     if transpose:
-        result = [list(row) for row in moves.zip_longest(*result, fillvalue=None)] # idiom for transpose
+        result = [list(row) for row in zip_longest(*result, fillvalue=None)] # idiom for transpose
 
     return result
 
@@ -62,7 +59,7 @@ def _write_tsv(tsv, list_of_list):
                 tsv.write(u"")
          tsv.write(u"\n")
 
-FRACTIONAL_PART_RE = re.compile(u"\.(0+)")
+FRACTIONAL_PART_RE = re.compile(r"\.(0+)")
 
 def _format_cell_value(cell):
     """

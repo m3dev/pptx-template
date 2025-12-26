@@ -5,12 +5,9 @@ import logging
 import re
 import numbers
 
-from six import string_types
-
 import pptx_template.pyel as pyel
 
 from pptx.shapes.graphfrm import GraphicFrame
-from pptx.shapes.table import Table
 
 log = logging.getLogger()
 
@@ -95,7 +92,7 @@ def replace_all_els_in_text_frame(text_frame, model):
             replacing_text = ''
         elif isinstance(value, numbers.Number):
             replacing_text = str(value)
-        elif not isinstance(value, string_types):
+        elif not isinstance(value, str):
             log.error(u"Invalid value for {%s}, model: %s" % (el, value))
             continue
         else:
@@ -105,7 +102,7 @@ def replace_all_els_in_text_frame(text_frame, model):
             log.error(u"Cannot find {%s} in one text-run. To fix this, select this whole EL [%s] and reset font size by clicking size up then down" % (text_id, text_frame.text))
 
 def _find_el_position(texts, el):
-    """
+    r"""
     text の配列中に分かれて記述されている EL の、先頭の '\{' の位置と、最後の '\}' の位置を返す。
     それぞれの位置は (text_index, position_in_text) の形で返される。
     """
