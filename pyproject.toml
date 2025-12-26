@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pptx-template"
+version = "1.0.0"
+description = "The PowerPoint presentation builder using template.pptx and data(json and csv)"
+readme = "README.rst"
+license = "Apache-2.0"
+authors = [
+    { name = "Reki Murakami", email = "reki2000@gmail.com" }
+]
+keywords = ["powerpoint", "ppt", "pptx"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "python-pptx>=1.0.0",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[project.scripts]
+pptx_template = "pptx_template.cli:main"
+
+[project.urls]
+Homepage = "http://github.com/m3dev/pptx-template"
+
+[tool.setuptools.packages.find]
+include = ["pptx_template*"]
